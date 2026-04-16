@@ -2,11 +2,18 @@ import withPWAInit from "@ducanh2912/next-pwa";
 
 // Inicializamos el plugin PWA
 const withPWA = withPWAInit({
-  dest: "public",       // Donde se guardan los archivos generados
-  cacheOnFrontEndNav: true, // Hace que la navegación se sienta instantánea
+  dest: "public",
+  cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
-  reloadOnOnline: true, // Recargar si vuelve internet
-  disable: process.env.NODE_ENV === "development", // Desactivar en modo desarrollo para que no moleste
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === "development",
+  // ⚠️ IMPORTANTE: Estas rutas NO deben cachearse nunca.
+  // Son páginas con token en la URL (activación / recuperación).
+  // Si el SW las cachea, en browsers de WhatsApp el token se pierde.
+  fallbackRoutes: {},
+  workboxOptions: {
+    runtimeCaching: [],
+  },
 });
 
 /** @type {import('next').NextConfig} */
