@@ -110,35 +110,41 @@ export default function PrimerAccesoPage() {
 
       setDone(true);
 
-      // ⚠️ IMPORTANTE: La Admin API de Supabase invalida todos los tokens
-      // cuando cambia la contraseña. Debemos renovar la sesión.
+      // Renovar sesión: Supabase Admin invalida el token al cambiar contraseña.
+      // Debemos hacer sign-out + sign-in para obtener un token fresco.
+      const emailGuardado = session.user.email as string;
+      const rolGuardado = (userInfo?.rol || "").toLowerCase();
+      
       await supabase.auth.signOut();
       
       const { data: nuevaSesion, error: loginError } = await supabase.auth.signInWithPassword({
-        email: session.user.email,   // El email ya lo tenemos de la sesión anterior
-        password: password,           // La nueva contraseña que el usuario acaba de crear
+        email: emailGuardado,
+        password: password,
       });
 
-      const rol = (
-        nuevaSesion?.user?.user_metadata?.rol ||
-        userInfo?.rol ||
-        ""
+      // Calcular destino según rol (del metadata nuevo o del guardado)
+      const rolFinal = (
+        nuevaSesion?.user?.user_metadata?.rol || rolGuardado
       ).toLowerCase();
 
       const destino =
-        rol === "propietario" || rol === "admin"
+        rolFinal === "propietario" || rolFinal === "admin"
           ? "/dashboard/propietario"
-          : rol === "tutor" || rol === "padre"
+          : rolFinal === "tutor" || rolFinal === "padre"
           ? "/dashboard/tutor"
           : "/dashboard/asistente";
 
-      // Si el re-login falla por alguna razón, mandamos al login normal
+      // CRÍTICO: usar window.location.href (hard redirect), NO router.push().
+      // router.push() es navegación interna de Next.js y puede reutilizar
+      // el estado de sesión en memoria todavía inválido.
+      // window.location.href fuerza la recarga completa del browser,
+      // que lee la sesión fresca de localStorage de Supabase.
       if (loginError) {
-        setTimeout(() => router.push("/login"), 2000);
+        window.location.href = "/login";
         return;
       }
 
-      setTimeout(() => router.push(destino), 2000);
+      window.location.href = destino;
     } catch {
       setError("No se pudo conectar con el servidor. Revisa tu internet.");
     } finally {
