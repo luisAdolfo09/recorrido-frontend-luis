@@ -141,18 +141,33 @@ export default function UsuariosPage() {
       if (!res.ok) throw new Error("No se pudo generar el enlace.");
 
       const data = await res.json();
-      const telefonoLimpio = user.telefono.replace(/[\s\-\(\)]/g, '');
+
+      // --- Normalizar el teléfono al formato internacional para WhatsApp ---
+      // WhatsApp requiere: https://wa.me/[código_pais][número], sin +, sin espacios, sin guiones
+      let telefonoLimpio = user.telefono.replace(/[\s\-\(\)]/g, ''); // quitar espacios y guiones
       
+      // Si el número ya empieza con '+', solo quitamos el '+'
+      if (telefonoLimpio.startsWith('+')) {
+        telefonoLimpio = telefonoLimpio.slice(1);
+      } else if (!telefonoLimpio.startsWith('502') && telefonoLimpio.length === 8) {
+        // Número guatemalteco sin código de país (8 dígitos): agregar 502
+        telefonoLimpio = `502${telefonoLimpio}`;
+      }
+      // Si el número ya incluye código de país (más de 8 dígitos), lo dejamos como está
+
       // Mensaje personalizado
       let mensajeWhatsapp = data.mensaje;
       if (esReset) {
-          mensajeWhatsapp = `Hola ${user.nombre}, hemos generado un enlace para que restablezcas tu contraseña:\n\n🔗 ${data.link}`;
+          mensajeWhatsapp = `Hola ${user.nombre}, el administrador ha generado un enlace para que *restablescas tu contraseña* de acceso al sistema:\n\n🔗 ${data.link}\n\n_Este enlace es de un solo uso._`;
       }
 
       const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensajeWhatsapp)}`;
       window.open(url, "_blank");
       
-      toast({ title: esReset ? "Enlace de recuperación enviado" : "Invitación enviada" });
+      toast({ 
+        title: esReset ? "🔑 Enlace de recuperación listo" : "✅ Invitación lista",
+        description: `Se abrirá WhatsApp para enviar el mensaje a ${user.nombre}.`
+      });
       fetchData(); // Recargar para actualizar estados
 
     } catch (error: any) {

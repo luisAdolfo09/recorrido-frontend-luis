@@ -192,8 +192,10 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <div className="mt-6 text-center text-xs text-muted-foreground">
-            <p>¿Olvidaste tu contraseña? Contacta al administrador.</p>
+          <div className="mt-6 text-center text-sm font-medium">
+            <a href="/recuperar-contrasena" className="text-primary hover:text-primary/80 transition-colors">
+              ¿Olvidaste tu contraseña? Click aquí
+            </a>
           </div>
         </CardContent>
       </Card>
