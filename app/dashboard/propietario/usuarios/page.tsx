@@ -125,7 +125,7 @@ export default function UsuariosPage() {
 
   // --- ACCIONES ---
 
-  // 1. Enviar Invitación / Resetear Password
+  // 1. Generar acceso temporal y abrir WhatsApp
   const handleEnviarInvitacion = async (user: UsuarioUnificado, esReset: boolean) => {
     setActionLoading(user.id);
     try {
@@ -138,37 +138,26 @@ export default function UsuariosPage() {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 
-      if (!res.ok) throw new Error("No se pudo generar el enlace.");
+      if (!res.ok) throw new Error("No se pudo generar el acceso temporal.");
 
       const data = await res.json();
 
-      // --- Normalizar el teléfono al formato internacional para WhatsApp ---
-      // WhatsApp requiere: https://wa.me/[código_pais][número], sin +, sin espacios, sin guiones
-      let telefonoLimpio = user.telefono.replace(/[\s\-\(\)]/g, ''); // quitar espacios y guiones
-      
-      // Si el número ya empieza con '+', solo quitamos el '+'
+      // Normalizar teléfono al formato internacional de WhatsApp (505 = Nicaragua)
+      let telefonoLimpio = user.telefono.replace(/[\s\-\(\)]/g, '');
       if (telefonoLimpio.startsWith('+')) {
         telefonoLimpio = telefonoLimpio.slice(1);
       } else if (!telefonoLimpio.startsWith('505') && telefonoLimpio.length === 8) {
-        // Número nicaragüense sin código de país (8 dígitos): agregar 505
         telefonoLimpio = `505${telefonoLimpio}`;
       }
-      // Si el número ya incluye código de país (más de 8 dígitos), lo dejamos como está
 
-      // Mensaje personalizado
-      let mensajeWhatsapp = data.mensaje;
-      if (esReset) {
-          mensajeWhatsapp = `Hola ${user.nombre}, el administrador ha generado un enlace para que *restablescas tu contraseña* de acceso al sistema:\n\n🔗 ${data.link}\n\n_Este enlace es de un solo uso._`;
-      }
-
-      const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensajeWhatsapp)}`;
+      const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(data.mensaje)}`;
       window.open(url, "_blank");
       
       toast({ 
-        title: esReset ? "🔑 Enlace de recuperación listo" : "✅ Invitación lista",
-        description: `Se abrirá WhatsApp para enviar el mensaje a ${user.nombre}.`
+        title: esReset ? "🔑 Nuevo acceso generado" : "✅ Invitación lista",
+        description: `WhatsApp se abrirá con el usuario y contraseña temporal de ${user.nombre}.`
       });
-      fetchData(); // Recargar para actualizar estados
+      fetchData();
 
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

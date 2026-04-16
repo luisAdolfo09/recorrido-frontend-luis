@@ -50,17 +50,15 @@ export default function LoginPage() {
         body: JSON.stringify({ identifier: identifier }),
       });
 
-      // 🛡️ MANEJO ESPECÍFICO DE ERRORES
       if (!lookupRes.ok) {
         if (lookupRes.status === 429) {
             throw new Error("Has realizado demasiadas solicitudes. Por favor espera 1 minuto antes de intentar de nuevo.");
         }
-        
         const errorBody = await lookupRes.json().catch(() => ({}));
         throw new Error(errorBody.message || "Usuario no encontrado en el sistema.");
       }
 
-      const { email: realEmail, rol: rawRole } = await lookupRes.json();
+      const { email: realEmail, rol: rawRole, estatus } = await lookupRes.json();
       const realRole = rawRole ? rawRole.toLowerCase().trim() : "";
       
       // PASO 2: Login en Supabase
@@ -73,9 +71,7 @@ export default function LoginPage() {
 
       // Sincronización de rol si es necesario
       if (data.user && data.user.user_metadata?.rol !== realRole) {
-          await supabase.auth.updateUser({
-            data: { rol: realRole }
-          });
+          await supabase.auth.updateUser({ data: { rol: realRole } });
           await supabase.auth.refreshSession();
       }
 
@@ -85,9 +81,16 @@ export default function LoginPage() {
         localStorage.removeItem("rememberedUser");
       }
 
+      // ✅ PRIMER ACCESO: usuario tiene contraseña temporal → redirigir a cambio obligatorio
+      if (estatus === "INVITADO") {
+        toast({ title: "¡Bienvenido!", description: "Por seguridad, crea tu contraseña definitiva." });
+        router.push("/primer-acceso");
+        return;
+      }
+
       toast({ title: "Bienvenido", description: "Accediendo al sistema..." });
 
-      // PASO 4: Redirección según rol
+      // Redirección según rol
       switch (realRole) {
         case 'propietario':
         case 'admin':
@@ -98,7 +101,7 @@ export default function LoginPage() {
           router.push("/dashboard/tutor"); 
           break;
         case 'asistente':
-        case 'chofer': // Agregamos chofer aquí por si acaso
+        case 'chofer':
           router.push("/dashboard/asistente");
           break;
         default:
@@ -108,8 +111,6 @@ export default function LoginPage() {
 
     } catch (err: any) {
       console.error("Error login:", err);
-      
-      // Mostrar mensaje exacto del error
       setError(err.message || "Error de conexión.");
 
       if (err.message?.includes("Invalid login credentials")) {
