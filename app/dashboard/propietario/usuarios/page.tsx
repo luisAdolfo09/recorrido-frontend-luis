@@ -149,9 +149,9 @@ export default function UsuariosPage() {
       // Si el número ya empieza con '+', solo quitamos el '+'
       if (telefonoLimpio.startsWith('+')) {
         telefonoLimpio = telefonoLimpio.slice(1);
-      } else if (!telefonoLimpio.startsWith('502') && telefonoLimpio.length === 8) {
-        // Número guatemalteco sin código de país (8 dígitos): agregar 502
-        telefonoLimpio = `502${telefonoLimpio}`;
+      } else if (!telefonoLimpio.startsWith('505') && telefonoLimpio.length === 8) {
+        // Número nicaragüense sin código de país (8 dígitos): agregar 505
+        telefonoLimpio = `505${telefonoLimpio}`;
       }
       // Si el número ya incluye código de país (más de 8 dígitos), lo dejamos como está
 
