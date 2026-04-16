@@ -110,8 +110,21 @@ export default function PrimerAccesoPage() {
 
       setDone(true);
 
-      // Redirigir al dashboard según el rol
-      const rol = (userInfo?.rol || "").toLowerCase();
+      // ⚠️ IMPORTANTE: La Admin API de Supabase invalida todos los tokens
+      // cuando cambia la contraseña. Debemos renovar la sesión.
+      await supabase.auth.signOut();
+      
+      const { data: nuevaSesion, error: loginError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,   // El email ya lo tenemos de la sesión anterior
+        password: password,           // La nueva contraseña que el usuario acaba de crear
+      });
+
+      const rol = (
+        nuevaSesion?.user?.user_metadata?.rol ||
+        userInfo?.rol ||
+        ""
+      ).toLowerCase();
+
       const destino =
         rol === "propietario" || rol === "admin"
           ? "/dashboard/propietario"
@@ -119,7 +132,13 @@ export default function PrimerAccesoPage() {
           ? "/dashboard/tutor"
           : "/dashboard/asistente";
 
-      setTimeout(() => router.push(destino), 2500);
+      // Si el re-login falla por alguna razón, mandamos al login normal
+      if (loginError) {
+        setTimeout(() => router.push("/login"), 2000);
+        return;
+      }
+
+      setTimeout(() => router.push(destino), 2000);
     } catch {
       setError("No se pudo conectar con el servidor. Revisa tu internet.");
     } finally {
