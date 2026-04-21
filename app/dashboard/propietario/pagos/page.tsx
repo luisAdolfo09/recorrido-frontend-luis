@@ -473,11 +473,11 @@ export default function PagosPage() {
                                                     {/* Col 3: Total Pendiente (NUEVA) */}
                                                     <div className="w-full md:w-[20%] text-left md:text-center">
                                                         {grupo.pendiente > 0 ? (
-                                                            <Badge variant="destructive" className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200">
+                                                            <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 dark:bg-orange-500/10 dark:border-orange-500/20 dark:text-orange-400">
                                                                 C$ {formatCurrency(grupo.pendiente)}
                                                             </Badge>
                                                         ) : (
-                                                            <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                                                            <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-500/10 dark:border-green-500/20 dark:text-green-400">
                                                                 <Check className="h-3 w-3 mr-1" /> Al día
                                                             </Badge>
                                                         )}
