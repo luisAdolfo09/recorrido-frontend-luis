@@ -371,20 +371,20 @@ export default function PagosPage() {
                     </Select>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                    <Card>
-                        <CardHeader className="pb-2"><CardDescription className="text-xs">Total Pagado</CardDescription></CardHeader>
-                        <CardContent><div className="text-xl md:text-2xl font-bold text-green-600">C${totalPagado.toLocaleString()}</div></CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <Card className="flex flex-col justify-between">
+                        <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Pagado</CardDescription></CardHeader>
+                        <CardContent><div className="text-2xl font-bold text-green-600">C${totalPagado.toLocaleString()}</div></CardContent>
                     </Card>
-                    <Card>
+                    <Card className="flex flex-col justify-between">
                         <CardHeader className="pb-2">
-                            <CardDescription className="text-xs">{cardMonthFilter === "Todos" ? "Total Pendiente (Anual)" : `Pendiente (${cardMonthFilter.split(" ")[0]})`}</CardDescription> 
+                            <CardDescription className="text-sm font-medium">{cardMonthFilter === "Todos" ? "Total Pendiente (Anual)" : `Pendiente (${cardMonthFilter.split(" ")[0]})`}</CardDescription> 
                         </CardHeader>
-                        <CardContent><div className="text-xl md:text-2xl font-bold text-orange-600">C${totalPendiente.toLocaleString()}</div></CardContent>
+                        <CardContent><div className="text-2xl font-bold text-orange-600">C${totalPendiente.toLocaleString()}</div></CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader className="pb-2"><CardDescription className="text-xs">Total Registros</CardDescription></CardHeader>
-                        <CardContent><div className="text-xl md:text-2xl font-bold">{totalRegistros}</div></CardContent>
+                    <Card className="flex flex-col justify-between sm:col-span-2 md:col-span-1">
+                        <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Registros</CardDescription></CardHeader>
+                        <CardContent><div className="text-2xl font-bold">{totalRegistros}</div></CardContent>
                     </Card>
                 </div>
 
