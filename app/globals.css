@@ -3,106 +3,135 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =====================================================
+   PALETA RECORRIDO ESCOLAR
+   Base: #ebe1e1 (Rosa crema) | #151355 (Azul marino) | #1b5680 (Azul medio)
+   Inspiración: suave, profesional, amigable
+   ===================================================== */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* ---- Fondos ---- */
+  --background: oklch(0.975 0.006 280);          /* #f5f3fb — fondo suave azul-lila muy tenue */
+  --foreground: oklch(0.18 0.04 265);            /* ~#151355 — texto oscuro */
+
+  /* ---- Tarjetas / Superficies ---- */
+  --card: oklch(1 0 0);                          /* blanco puro para cards */
+  --card-foreground: oklch(0.22 0.05 265);       /* azul marino oscuro */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.22 0.05 265);
+
+  /* ---- Primario: Azul marino #151355 ---- */
+  --primary: oklch(0.23 0.13 275);              /* #151355 */
+  --primary-foreground: oklch(0.98 0 0);         /* blanco */
+
+  /* ---- Secundario: Azul medio #1b5680 ---- */
+  --secondary: oklch(0.90 0.018 240);            /* azul muy pálido para fondos secundarios */
+  --secondary-foreground: oklch(0.26 0.10 245);  /* #1b5680 */
+
+  /* ---- Muted: Crema rosada #ebe1e1 ---- */
+  --muted: oklch(0.935 0.010 15);               /* ~#ebe1e1 rosa crema */
+  --muted-foreground: oklch(0.50 0.04 260);      /* azul grisáceo medio */
+
+  /* ---- Accent: Azul celeste pastel ---- */
+  --accent: oklch(0.88 0.04 240);               /* azul pastel claro */
+  --accent-foreground: oklch(0.26 0.10 245);     /* azul marino */
+
+  /* ---- Estados ---- */
+  --destructive: oklch(0.58 0.21 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* ---- Bordes e inputs ---- */
+  --border: oklch(0.875 0.018 250);              /* azul grisáceo muy pálido */
+  --input: oklch(0.94 0.010 250);
+  --ring: oklch(0.45 0.12 260);                  /* azul marino para focus ring */
+
+  /* ---- Charts armoniosos con la paleta ---- */
+  --chart-1: oklch(0.52 0.15 260);              /* azul marino medio */
+  --chart-2: oklch(0.58 0.12 200);              /* azul petróleo */
+  --chart-3: oklch(0.70 0.10 220);              /* azul celeste */
+  --chart-4: oklch(0.80 0.06 15);               /* rosa crema vibrante */
+  --chart-5: oklch(0.65 0.08 300);              /* lavanda suave */
+
+  /* ---- Radio ---- */
+  --radius: 0.75rem;
+
+  /* ---- Sidebar: Azul marino profundo #151355 ---- */
+  --sidebar: oklch(0.23 0.13 275);             /* azul marino = primario */
+  --sidebar-foreground: oklch(0.95 0.01 250);  /* blanco azulado */
+  --sidebar-primary: oklch(0.72 0.10 220);     /* azul celeste pastel para items activos */
+  --sidebar-primary-foreground: oklch(0.15 0.12 270);
+  --sidebar-accent: oklch(0.30 0.10 270);      /* hover en sidebar */
+  --sidebar-accent-foreground: oklch(0.95 0.01 250);
+  --sidebar-border: oklch(0.32 0.09 270);
+  --sidebar-ring: oklch(0.72 0.10 220);
 }
 
+/* =====================================================
+   MODO OSCURO — Tonos navy profundos, elegante
+   ===================================================== */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* ---- Fondos dark ---- */
+  --background: oklch(0.12 0.06 270);           /* navy muy oscuro */
+  --foreground: oklch(0.92 0.01 250);           /* blanco azulado */
+
+  /* ---- Tarjetas dark ---- */
+  --card: oklch(0.165 0.08 268);                /* navy suavizado */
+  --card-foreground: oklch(0.93 0.01 250);
+  --popover: oklch(0.165 0.08 268);
+  --popover-foreground: oklch(0.93 0.01 250);
+
+  /* ---- Primario dark: azul claro vibrante ---- */
+  --primary: oklch(0.72 0.12 228);              /* azul celeste brillante */
+  --primary-foreground: oklch(0.12 0.08 270);   /* navy oscuro */
+
+  /* ---- Secundario dark ---- */
+  --secondary: oklch(0.22 0.08 268);
+  --secondary-foreground: oklch(0.88 0.05 240);
+
+  /* ---- Muted dark ---- */
+  --muted: oklch(0.20 0.07 268);
+  --muted-foreground: oklch(0.65 0.05 250);
+
+  /* ---- Accent dark ---- */
+  --accent: oklch(0.28 0.09 265);
+  --accent-foreground: oklch(0.90 0.04 240);
+
+  /* ---- Estados dark ---- */
+  --destructive: oklch(0.42 0.15 27);
+  --destructive-foreground: oklch(0.85 0.05 27);
+
+  /* ---- Bordes dark ---- */
+  --border: oklch(0.26 0.07 268);
+  --input: oklch(0.22 0.07 268);
+  --ring: oklch(0.60 0.12 228);
+
+  /* ---- Charts dark ---- */
+  --chart-1: oklch(0.68 0.14 228);
+  --chart-2: oklch(0.60 0.13 195);
+  --chart-3: oklch(0.75 0.10 250);
+  --chart-4: oklch(0.72 0.09 15);
+  --chart-5: oklch(0.63 0.11 300);
+
+  /* ---- Sidebar dark: navy más profundo ---- */
+  --sidebar: oklch(0.14 0.08 272);
+  --sidebar-foreground: oklch(0.92 0.01 250);
+  --sidebar-primary: oklch(0.68 0.13 228);
+  --sidebar-primary-foreground: oklch(0.12 0.08 270);
+  --sidebar-accent: oklch(0.22 0.08 268);
+  --sidebar-accent-foreground: oklch(0.92 0.01 250);
+  --sidebar-border: oklch(0.22 0.07 268);
+  --sidebar-ring: oklch(0.68 0.13 228);
 }
 
+/* =====================================================
+   THEME TOKENS — mapeo para Tailwind
+   ===================================================== */
 @theme inline {
-  --font-sans: "Inter", system-ui, sans-serif;
+  /* Tipografía — Outfit: limpia, moderna, legible */
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", monospace;
 
-  /* Color System - Professional Educational Theme */
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #ffffff;
-
-  --color-secondary: #f3f4f6;
-  --color-secondary-foreground: #1f2937;
-
-  --color-accent: #10b981;
-  --color-accent-foreground: #ffffff;
-
-  --color-background: #ffffff;
-  --color-foreground: #1f2937;
-
-  --color-card: #ffffff;
-  --color-card-foreground: #1f2937;
-
-  --color-muted: #f9fafb;
-  --color-muted-foreground: #6b7280;
-
-  --color-border: #e5e7eb;
-  --color-input: #e5e7eb;
-  --color-ring: #3b82f6;
-
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-
+  /* Tokens de color */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -127,10 +156,6 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -140,24 +165,43 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius: 0.5rem;
+  /* Radio */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius: 0.75rem;
 }
 
+/* =====================================================
+   BASE GLOBAL
+   ===================================================== */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 }
 
-/* ===== UTILIDADES PREMIUM DASHBOARD ===== */
+/* =====================================================
+   UTILIDADES PERSONALIZADAS
+   ===================================================== */
+
+/* Fondo semitransparente blanco para glassmorphism */
 .bg-white\/8 {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Scrollbar del sidebar */
+/* Scrollbar del sidebar — delgada y elegante */
 .overflow-y-auto::-webkit-scrollbar {
   width: 3px;
 }
@@ -165,24 +209,41 @@
   background: transparent;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.18);
   border-radius: 3px;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.32);
 }
 
-/* Animación pulse para el indicador activo */
+/* Animación suave para indicador activo */
 @keyframes gentle-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
 
-
-* {
-  border-color: var(--color-border);
+/* Gradiente del sidebar (azul marino → azul medio) */
+.sidebar-gradient {
+  background: linear-gradient(160deg, #0f0e30 0%, #151355 45%, #1b5680 100%);
 }
 
-body {
-  font-feature-settings: "rlig" 1, "calt" 1;
+/* Gradiente de primario para botones y accents */
+.btn-primary-gradient {
+  background: linear-gradient(135deg, #1b5680 0%, #151355 100%);
+}
+
+/* Gradiente suave para loading screens */
+.loading-gradient {
+  background: linear-gradient(135deg, #0f0e30, #151355, #1b5680);
+}
+
+/* Card con sombra suave */
+.card-soft {
+  box-shadow: 0 1px 3px rgba(21, 19, 85, 0.06), 0 4px 16px rgba(21, 19, 85, 0.04);
+}
+
+/* Focus ring consistente con la paleta */
+.focus-ring-primary:focus {
+  outline: 2px solid #1b5680;
+  outline-offset: 2px;
 }

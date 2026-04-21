@@ -116,11 +116,11 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)' }}>
-        <div className="flex flex-col items-center gap-4">
+      <div className="flex h-screen items-center justify-center loading-gradient">
+        <div className="flex flex-col items-center gap-5">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-violet-400 animate-spin" />
-            <Bus className="absolute inset-0 m-auto h-7 w-7 text-violet-300" />
+            <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-sky-300 animate-spin" />
+            <Bus className="absolute inset-0 m-auto h-7 w-7 text-sky-200" />
           </div>
           <p className="text-white/60 text-sm font-medium tracking-widest uppercase">Cargando...</p>
         </div>
@@ -137,33 +137,37 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
   const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
 
       {/* ============================================ */}
       {/* HEADER PREMIUM                               */}
       {/* ============================================ */}
       <header className="sticky top-0 z-40 w-full">
         {/* Fondo glassmorphism */}
-        <div className="relative border-b border-white/10 dark:border-white/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm">
+        <div className="relative border-b border-border/60 bg-white/85 dark:bg-card/90 backdrop-blur-xl shadow-sm">
           <div className="flex items-center justify-between px-4 py-3 md:px-6">
             
             {/* ---- Izquierda: Hamburger + Logo + Título ---- */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="group relative flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 transition-all hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:scale-105 active:scale-95"
+                className="group relative flex h-9 w-9 items-center justify-center rounded-xl
+                           bg-blue-50 dark:bg-blue-900/20 
+                           text-[#1b5680] dark:text-sky-300 
+                           transition-all hover:bg-blue-100 dark:hover:bg-blue-900/40 
+                           hover:scale-105 active:scale-95"
               >
                 <Menu className="h-4 w-4" />
               </button>
 
               {/* Logo + Nombre */}
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-700 shadow-md shadow-violet-500/30">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg btn-primary-gradient shadow-md shadow-blue-800/20">
                   <Bus className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-none">{title}</h1>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-none mt-0.5 hidden md:block">
+                  <h1 className="text-sm font-bold text-[#151355] dark:text-slate-100 leading-none">{title}</h1>
+                  <p className="text-[10px] text-[#1b5680]/60 dark:text-sky-400/60 leading-none mt-0.5 hidden md:block">
                     Recorrido Escolar
                   </p>
                 </div>
@@ -174,39 +178,46 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
             <div className="flex items-center gap-1.5 md:gap-2">
               
               {/* Campana de Notificaciones */}
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-muted dark:hover:bg-accent transition-colors">
                 <NotificationsBell />
               </div>
 
               {/* Tema */}
               <button
                 onClick={toggleTheme}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                className="flex h-9 w-9 items-center justify-center rounded-xl 
+                           text-[#1b5680]/70 dark:text-sky-300/70 
+                           hover:bg-muted dark:hover:bg-accent 
+                           transition-all hover:scale-105 active:scale-95"
                 title={isDarkMode ? "Modo claro" : "Modo oscuro"}
               >
                 {isDarkMode 
                   ? <Sun className="h-4 w-4 text-amber-400" /> 
-                  : <Moon className="h-4 w-4" />
+                  : <Moon className="h-4 w-4 text-[#1b5680]" />
                 }
               </button>
 
               {/* Divider */}
-              <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden md:block" />
+              <div className="h-5 w-px bg-border mx-1 hidden md:block" />
 
               {/* Avatar + Cerrar sesión */}
               <div className="flex items-center gap-2">
                 {/* Avatar */}
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-700 text-white text-[10px] font-bold">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted dark:bg-accent">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full btn-primary-gradient text-white text-[10px] font-bold">
                     {initials}
                   </div>
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{user.name}</span>
+                  <span className="text-xs font-medium text-[#151355] dark:text-slate-200">{user.name}</span>
                 </div>
 
                 {/* Botón Cerrar Sesión */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 shadow-md shadow-violet-500/25 transition-all hover:scale-105 active:scale-95 hover:shadow-violet-500/40"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white 
+                             btn-primary-gradient 
+                             hover:opacity-90
+                             shadow-md shadow-blue-900/20 
+                             transition-all hover:scale-105 active:scale-95"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Salir</span>
@@ -229,7 +240,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
               onClick={() => setSidebarOpen(false)}
             />
 
@@ -239,14 +250,11 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.3, type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 left-0 h-full w-72 z-50 flex flex-col overflow-hidden"
-              style={{
-                background: 'linear-gradient(160deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%)',
-              }}
+              className="fixed top-0 left-0 h-full w-72 z-50 flex flex-col overflow-hidden sidebar-gradient"
             >
               {/* Decoración de fondo */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-700/15 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-sky-500/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-900/15 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
 
               {/* Header del Sidebar */}
               <div className="relative flex items-center justify-between px-5 py-5 border-b border-white/10">
@@ -256,7 +264,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                   </div>
                   <div>
                     <p className="text-white font-bold text-sm leading-none">Recorrido</p>
-                    <p className="text-violet-300 text-[10px] mt-0.5">Sistema Escolar</p>
+                    <p className="text-sky-300/80 text-[10px] mt-0.5">Sistema Escolar</p>
                   </div>
                 </div>
                 <button
@@ -270,12 +278,12 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
               {/* Perfil de usuario */}
               <div className="relative px-5 py-4 border-b border-white/10">
                 <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 border border-white/10">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 to-purple-600 text-white text-sm font-bold shadow-lg shadow-violet-900/50 shrink-0">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white text-sm font-bold shadow-lg shadow-blue-900/40 shrink-0">
                     {initials}
                   </div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-semibold leading-none truncate">{user.name}</p>
-                    <p className="text-violet-300 text-[11px] mt-0.5">{user.role}</p>
+                    <p className="text-sky-300/80 text-[11px] mt-0.5">{user.role}</p>
                   </div>
                   <div className="ml-auto shrink-0">
                     <span className="flex items-center gap-1">
@@ -309,7 +317,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                         `}>
                           {/* Indicador activo */}
                           {isActive && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-full bg-violet-300" />
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-full bg-sky-300" />
                           )}
 
                           {/* Icono */}
@@ -317,23 +325,23 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                             flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-all duration-200
                             ${isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'}
                           `}>
-                            <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-violet-300 group-hover:text-white'}`} />
+                            <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-sky-300 group-hover:text-white'}`} />
                           </div>
 
                           {/* Texto */}
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium leading-none truncate ${isActive ? 'text-white' : 'text-violet-100 group-hover:text-white'}`}>
+                            <p className={`text-sm font-medium leading-none truncate ${isActive ? 'text-white' : 'text-sky-100 group-hover:text-white'}`}>
                               {item.title}
                             </p>
                             {item.description && (
-                              <p className="text-[10px] text-violet-400 group-hover:text-violet-300 mt-0.5 truncate transition-colors">
+                              <p className="text-[10px] text-sky-400/70 group-hover:text-sky-300 mt-0.5 truncate transition-colors">
                                 {item.description}
                               </p>
                             )}
                           </div>
 
                           {/* Flecha */}
-                          <ChevronRight className={`h-3 w-3 shrink-0 transition-all duration-200 ${isActive ? 'text-white opacity-100' : 'text-violet-400 opacity-0 group-hover:opacity-100'}`} />
+                          <ChevronRight className={`h-3 w-3 shrink-0 transition-all duration-200 ${isActive ? 'text-white opacity-100' : 'text-sky-400 opacity-0 group-hover:opacity-100'}`} />
                         </div>
                       </Link>
                     </motion.div>
@@ -364,9 +372,9 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
           <div className="mb-6">
             <button
               onClick={() => router.push(mainDashboardPath)}
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400 transition-colors group"
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-[#1b5680] dark:hover:text-sky-400 transition-colors group"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-violet-50 dark:group-hover:bg-violet-900/30 transition-colors">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                 <LayoutDashboard className="h-3.5 w-3.5" />
               </div>
               Volver al Panel Principal

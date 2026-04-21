@@ -1,15 +1,19 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next" 
-import { Geist, Geist_Mono } from "next/font/google"
+import { Outfit } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/toaster"
 import AuthListener  from "@/components/auth-listener" 
-import SecurityGuard from "@/components/security-guard" // Importación por defecto (sin llaves)
-import RealTimeListener from "@/components/real-time-listener" // El oído para WebSockets
+import SecurityGuard from "@/components/security-guard"
+import RealTimeListener from "@/components/real-time-listener"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
-const _geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
+const outfit = Outfit({ 
+  subsets: ["latin"], 
+  variable: "--font-outfit",
+  weight: ["300","400","500","600","700","800"],
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#16a34a",
+  themeColor: "#151355",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -39,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${_geist.variable} ${_geistMono.variable} font-sans antialiased`}>
+      <body className={`${outfit.variable} font-sans antialiased`}>
         
         {/* Componentes invisibles de lógica global */}
         <SecurityGuard />

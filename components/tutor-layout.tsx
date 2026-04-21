@@ -8,7 +8,6 @@ import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-// 👇 1. IMPORTAR LA CAMPANA
 import { NotificationsBell } from "@/components/notifications-bell"
 
 interface TutorLayoutProps {
@@ -98,7 +97,10 @@ export function TutorLayout({ children, title }: TutorLayoutProps) {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background text-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1b5680] dark:text-sky-400" />
+          <p className="text-sm text-muted-foreground font-medium">Cargando...</p>
+        </div>
       </div>
     )
   }
@@ -113,42 +115,68 @@ export function TutorLayout({ children, title }: TutorLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="bg-card border-b border-border sticky top-0 z-40">
+      {/* Header */}
+      <header className="bg-white/90 dark:bg-card/95 border-b border-border/60 backdrop-blur-xl sticky top-0 z-40 shadow-sm">
         <div className="flex items-center justify-between px-4 py-3 md:px-6">
           
-          {/* Izquierda: Título y Nombre (Estilo Admin) */}
+          {/* Izquierda: Título */}
           <div>
-             <h1 className="text-lg font-bold text-foreground leading-none">{title}</h1>
-             <p className="text-xs text-muted-foreground mt-1">{user?.name}</p>
+            <h1 className="text-lg font-bold text-[#151355] dark:text-slate-100 leading-none">{title}</h1>
+            <p className="text-xs text-[#1b5680]/60 dark:text-sky-400/60 mt-0.5 font-medium">{user?.name}</p>
           </div>
 
-          {/* Derecha: Acciones (Estilo Admin) */}
-          <div className="flex items-center gap-2">
+          {/* Derecha: Acciones */}
+          <div className="flex items-center gap-1.5 md:gap-2">
             
-            {/* 👇 2. CAMPANA AGREGADA AQUÍ */}
-            <NotificationsBell />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-muted dark:hover:bg-accent transition-colors">
+              <NotificationsBell />
+            </div>
 
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
+            <button
+              onClick={toggleTheme}
+              className="flex h-9 w-9 items-center justify-center rounded-xl 
+                         text-[#1b5680]/70 dark:text-sky-300/70 
+                         hover:bg-muted dark:hover:bg-accent 
+                         transition-all hover:scale-105 active:scale-95"
+              title={isDarkMode ? "Modo claro" : "Modo oscuro"}
+            >
+              {isDarkMode 
+                ? <Sun className="h-4 w-4 text-amber-400" /> 
+                : <Moon className="h-4 w-4 text-[#1b5680]" />
+              }
+            </button>
             
-            <Button size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Cerrar Sesión</span>
-            </Button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white 
+                         btn-primary-gradient shadow-md shadow-blue-900/20 
+                         transition-all hover:scale-105 active:scale-95 hover:opacity-90"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Salir</span>
+            </button>
           </div>
         </div>
       </header>
 
       <main className="flex-1 p-4 md:p-6 pb-24">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border z-50 flex justify-around items-center pb-safe">
+      {/* Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 dark:bg-card/95 border-t border-border/60 backdrop-blur-xl z-50 flex justify-around items-center pb-safe shadow-lg">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
-            <Link key={item.title} href={item.href} className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all ${isActive ? "text-primary scale-105 font-medium" : "text-muted-foreground"}`}>
-                <item.icon className={`h-6 w-6 ${isActive ? "fill-current/20" : ""}`} />
-                <span className="text-[10px]">{item.title}</span>
+            <Link
+              key={item.title}
+              href={item.href}
+              className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg transition-all ${
+                isActive 
+                  ? "text-[#151355] dark:text-sky-400 scale-105 font-semibold" 
+                  : "text-muted-foreground hover:text-[#1b5680] dark:hover:text-sky-300"
+              }`}
+            >
+              <item.icon className={`h-6 w-6 ${isActive ? "drop-shadow-sm" : ""}`} />
+              <span className="text-[10px]">{item.title}</span>
             </Link>
           )
         })}

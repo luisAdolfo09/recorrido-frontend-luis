@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Bus, AlertCircle, Loader2 } from "lucide-react";
+import { Bus, AlertCircle, Loader2, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -122,84 +122,161 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <Bus className="w-8 h-8 text-primary-foreground" />
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #0f0e30 0%, #151355 50%, #1b5680 100%)",
+      }}
+    >
+      {/* Decoración de fondo — círculos difusos */}
+      <div className="absolute top-0 -right-20 w-80 h-80 rounded-full bg-sky-400/8 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-blue-800/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/2 blur-3xl pointer-events-none" />
+
+      {/* Card principal */}
+      <div className="relative w-full max-w-md">
+        {/* Glassmorphism card */}
+        <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl shadow-black/40 overflow-hidden">
+          
+          {/* Header */}
+          <div className="px-8 pt-10 pb-6 text-center">
+            {/* Logo */}
+            <div className="mx-auto mb-5 w-16 h-16 rounded-2xl btn-primary-gradient flex items-center justify-center shadow-xl shadow-blue-900/40 border border-white/20">
+              <Bus className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              Recorrido Escolar
+            </h1>
+            <p className="text-sky-200/70 text-sm mt-1.5 font-light">
+              Ingresa tus credenciales para acceder
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold text-balance">
-            Recorrido Escolar
-          </CardTitle>
-          <CardDescription className="text-pretty">
-            Ingresa tus credenciales para acceder
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="identifier">Usuario o Teléfono</Label>
-              <Input
-                id="identifier"
-                type="text"
-                placeholder="Ej: juan.perez"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
+          {/* Formulario */}
+          <div className="px-8 pb-10">
+            <form onSubmit={handleLogin} className="space-y-4">
+              
+              {/* Campo Usuario */}
+              <div className="space-y-1.5">
+                <label htmlFor="identifier" className="text-xs font-semibold text-sky-200/80 uppercase tracking-wider">
+                  Usuario o Teléfono
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sky-300/50" />
+                  <input
+                    id="identifier"
+                    type="text"
+                    placeholder="Ej: juan.perez"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 text-sm font-medium
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400/50
+                               disabled:opacity-50 disabled:cursor-not-allowed
+                               transition-all"
+                  />
+                </div>
+              </div>
 
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              <Label htmlFor="remember" className="cursor-pointer font-normal">
-                Recordarme
-              </Label>
-            </div>
+              {/* Campo Contraseña */}
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="text-xs font-semibold text-sky-200/80 uppercase tracking-wider">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sky-300/50" />
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 text-sm font-medium
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400/50
+                               disabled:opacity-50 disabled:cursor-not-allowed
+                               transition-all"
+                  />
+                </div>
+              </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+              {/* Recordarme */}
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="w-4 h-4 rounded border border-white/30 bg-white/10 flex items-center justify-center cursor-pointer 
+                               peer-checked:bg-sky-500 peer-checked:border-sky-500 transition-all"
+                  >
+                    {remember && (
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </label>
+                </div>
+                <label htmlFor="remember" className="text-xs text-sky-200/70 cursor-pointer select-none font-medium">
+                  Recordarme en este dispositivo
+                </label>
+              </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...
-                </>
-              ) : (
-                "Iniciar Sesión"
+              {/* Error */}
+              {error && (
+                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-red-500/15 border border-red-400/30 text-red-300 text-sm">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
               )}
-            </Button>
-          </form>
-          <div className="mt-6 text-center text-sm font-medium">
-            <a href="/recuperar-contrasena" className="text-primary hover:text-primary/80 transition-colors">
-              ¿Olvidaste tu contraseña? Click aquí
-            </a>
+
+              {/* Botón Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white
+                           bg-gradient-to-r from-sky-500 to-blue-600
+                           hover:from-sky-400 hover:to-blue-500
+                           shadow-lg shadow-blue-900/40
+                           disabled:opacity-60 disabled:cursor-not-allowed
+                           transition-all hover:scale-[1.02] active:scale-[0.98]
+                           flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  "Iniciar Sesión"
+                )}
+              </button>
+            </form>
+
+            {/* Recuperar contraseña */}
+            <div className="mt-6 text-center">
+              <a
+                href="/recuperar-contrasena"
+                className="text-xs text-sky-300/70 hover:text-sky-200 transition-colors font-medium"
+              >
+                ¿Olvidaste tu contraseña? <span className="underline underline-offset-2">Recupérala aquí</span>
+              </a>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Tagline debajo */}
+        <p className="text-center text-white/25 text-xs mt-5 font-light tracking-wide">
+          Sistema de Gestión · Recorrido Escolar
+        </p>
+      </div>
     </div>
   );
 }
