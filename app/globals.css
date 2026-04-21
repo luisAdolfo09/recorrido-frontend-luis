@@ -70,57 +70,57 @@
    MODO OSCURO — Tonos navy profundos, elegante
    ===================================================== */
 .dark {
-  /* ---- Fondos dark ---- */
-  --background: oklch(0.12 0.06 270);           /* navy muy oscuro */
-  --foreground: oklch(0.92 0.01 250);           /* blanco azulado */
+  /* ---- Fondos dark: azul-slate medio, no tan oscuro ---- */
+  --background: oklch(0.22 0.055 258);          /* slate-blue medio claro, no negro */
+  --foreground: oklch(0.94 0.008 250);          /* blanco azulado suave */
 
   /* ---- Tarjetas dark ---- */
-  --card: oklch(0.165 0.08 268);                /* navy suavizado */
-  --card-foreground: oklch(0.93 0.01 250);
-  --popover: oklch(0.165 0.08 268);
-  --popover-foreground: oklch(0.93 0.01 250);
+  --card: oklch(0.27 0.060 260);               /* panel azul-slate, legible */
+  --card-foreground: oklch(0.94 0.008 250);
+  --popover: oklch(0.27 0.060 260);
+  --popover-foreground: oklch(0.94 0.008 250);
 
-  /* ---- Primario dark: azul claro vibrante ---- */
-  --primary: oklch(0.72 0.12 228);              /* azul celeste brillante */
-  --primary-foreground: oklch(0.12 0.08 270);   /* navy oscuro */
+  /* ---- Primario dark: azul celeste vibrante ---- */
+  --primary: oklch(0.65 0.14 228);             /* azul celeste brillante */
+  --primary-foreground: oklch(0.98 0 0);       /* blanco */
 
   /* ---- Secundario dark ---- */
-  --secondary: oklch(0.22 0.08 268);
-  --secondary-foreground: oklch(0.88 0.05 240);
+  --secondary: oklch(0.32 0.065 258);
+  --secondary-foreground: oklch(0.90 0.04 240);
 
   /* ---- Muted dark ---- */
-  --muted: oklch(0.20 0.07 268);
-  --muted-foreground: oklch(0.65 0.05 250);
+  --muted: oklch(0.30 0.055 258);
+  --muted-foreground: oklch(0.68 0.04 250);
 
   /* ---- Accent dark ---- */
-  --accent: oklch(0.28 0.09 265);
-  --accent-foreground: oklch(0.90 0.04 240);
+  --accent: oklch(0.35 0.070 258);
+  --accent-foreground: oklch(0.92 0.03 240);
 
   /* ---- Estados dark ---- */
-  --destructive: oklch(0.42 0.15 27);
-  --destructive-foreground: oklch(0.85 0.05 27);
+  --destructive: oklch(0.50 0.18 27);
+  --destructive-foreground: oklch(0.98 0 0);
 
-  /* ---- Bordes dark ---- */
-  --border: oklch(0.26 0.07 268);
-  --input: oklch(0.22 0.07 268);
-  --ring: oklch(0.60 0.12 228);
+  /* ---- Bordes dark: visibles pero sutiles ---- */
+  --border: oklch(0.36 0.055 258);
+  --input: oklch(0.32 0.055 258);
+  --ring: oklch(0.62 0.13 228);
 
   /* ---- Charts dark ---- */
-  --chart-1: oklch(0.68 0.14 228);
+  --chart-1: oklch(0.65 0.14 228);
   --chart-2: oklch(0.60 0.13 195);
-  --chart-3: oklch(0.75 0.10 250);
+  --chart-3: oklch(0.72 0.10 250);
   --chart-4: oklch(0.72 0.09 15);
   --chart-5: oklch(0.63 0.11 300);
 
-  /* ---- Sidebar dark: navy más profundo ---- */
-  --sidebar: oklch(0.14 0.08 272);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.68 0.13 228);
-  --sidebar-primary-foreground: oklch(0.12 0.08 270);
-  --sidebar-accent: oklch(0.22 0.08 268);
-  --sidebar-accent-foreground: oklch(0.92 0.01 250);
-  --sidebar-border: oklch(0.22 0.07 268);
-  --sidebar-ring: oklch(0.68 0.13 228);
+  /* ---- Sidebar dark: azul marino medio, no negro ---- */
+  --sidebar: oklch(0.24 0.10 268);            /* azul marino medio-oscuro */
+  --sidebar-foreground: oklch(0.94 0.008 250);
+  --sidebar-primary: oklch(0.65 0.14 228);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.32 0.08 262);
+  --sidebar-accent-foreground: oklch(0.94 0.008 250);
+  --sidebar-border: oklch(0.32 0.07 262);
+  --sidebar-ring: oklch(0.65 0.14 228);
 }
 
 /* =====================================================
@@ -222,19 +222,19 @@
   50% { opacity: 0.5; }
 }
 
-/* Gradiente del sidebar (azul marino → azul medio) */
+/* Gradiente del sidebar (azul marino medio → azul petróleo) — más claro y profesional */
 .sidebar-gradient {
-  background: linear-gradient(160deg, #0f0e30 0%, #151355 45%, #1b5680 100%);
+  background: linear-gradient(160deg, #1a2a6c 0%, #1d4280 45%, #1b5680 100%);
 }
 
 /* Gradiente de primario para botones y accents */
 .btn-primary-gradient {
-  background: linear-gradient(135deg, #1b5680 0%, #151355 100%);
+  background: linear-gradient(135deg, #1b5680 0%, #1d4280 100%);
 }
 
 /* Gradiente suave para loading screens */
 .loading-gradient {
-  background: linear-gradient(135deg, #0f0e30, #151355, #1b5680);
+  background: linear-gradient(135deg, #1a2a6c, #1d4280, #1b5680);
 }
 
 /* Card con sombra suave */

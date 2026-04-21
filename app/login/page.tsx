@@ -125,7 +125,7 @@ export default function LoginPage() {
     <div
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #0f0e30 0%, #151355 50%, #1b5680 100%)",
+        background: "linear-gradient(135deg, #1a2a6c 0%, #1d4280 45%, #1b5680 100%)",
       }}
     >
       {/* Decoración de fondo — círculos difusos */}
