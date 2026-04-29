@@ -131,36 +131,55 @@ export default function NuevoVehiculoPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Formatos de imagen aceptados
+  const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
+  const ACCEPTED_LABEL = 'JPG, PNG, WEBP o HEIC';
+  const MAX_SIZE_MB = 5;
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
     try {
-      if (!e.target.files || e.target.files.length === 0) return;
-      
+      if (!input.files || input.files.length === 0) return;
+
       setUploading(true);
-      const file = e.target.files[0];
+      const file = input.files[0];
 
-      if (!file.type.startsWith('image/')) throw new Error("Solo se permiten archivos de imagen");
-      if (file.size > 5 * 1024 * 1024) throw new Error("La imagen no puede ser mayor a 5MB");
+      // Validar tipo de archivo
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        throw new Error(`Formato no permitido. Solo se aceptan: ${ACCEPTED_LABEL}.`);
+      }
 
-      const fileExt = file.name.split('.').pop();
+      // Validar tamaño
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        throw new Error(`La imagen no puede superar los ${MAX_SIZE_MB}MB.`);
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('vehiculos') 
-        .upload(filePath, file);
+        .from('vehiculos')
+        .upload(fileName, file, { upsert: false });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        if (uploadError.message?.toLowerCase().includes('bucket not found')) {
+          throw new Error(
+            'El almacenamiento de imágenes no está configurado. Contacta al administrador para crear el bucket "vehiculos" en Supabase Storage.'
+          );
+        }
+        throw uploadError;
+      }
 
-      const { data } = supabase.storage.from('vehiculos').getPublicUrl(filePath);
-      
+      const { data } = supabase.storage.from('vehiculos').getPublicUrl(fileName);
       setFotoUrl(data.publicUrl);
       toast({ title: "Imagen cargada", description: "La foto se subió correctamente." });
 
     } catch (error: any) {
       console.error("Error subiendo imagen:", error);
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error al subir imagen", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
+      input.value = ''; // Permite reseleccionar el mismo archivo
     }
   };
 
@@ -285,8 +304,18 @@ export default function NuevoVehiculoPage() {
                               <div className="flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-4 py-2 rounded-md text-sm font-medium transition-colors">
                                   <Upload className="h-4 w-4" /> {fotoUrl ? "Cambiar Foto" : "Subir Foto"}
                               </div>
-                              <Input id="foto-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading || loading} />
+                              <Input
+                                id="foto-upload"
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                                className="hidden"
+                                onChange={handleImageUpload}
+                                disabled={uploading || loading}
+                              />
                           </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            Formatos aceptados: <span className="font-medium">JPG, PNG, WEBP, HEIC</span> · Máx. 5 MB
+                          </p>
                       </div>
                   </div>
               </div>
