@@ -110,41 +110,17 @@ export default function PrimerAccesoPage() {
 
       setDone(true);
 
-      // Renovar sesión: Supabase Admin invalida el token al cambiar contraseña.
-      // Debemos hacer sign-out + sign-in para obtener un token fresco.
-      const emailGuardado = session.user.email as string;
-      const rolGuardado = (userInfo?.rol || "").toLowerCase();
-      
+      // IMPORTANTE: Supabase Admin invalida el token cuando cambia la contraseña.
+      // Intentar un re-login automático aquí es frágil y provoca errores de sesión.
+      // La práctica segura es:
+      //   1. Cerrar la sesión actual (que ya es inválida)
+      //   2. Redirigir al login para que el usuario ingrese con su nueva contraseña
+      // Esto elimina el error "debes cerrar sesión y volver a entrar".
       await supabase.auth.signOut();
-      
-      const { data: nuevaSesion, error: loginError } = await supabase.auth.signInWithPassword({
-        email: emailGuardado,
-        password: password,
-      });
 
-      // Calcular destino según rol (del metadata nuevo o del guardado)
-      const rolFinal = (
-        nuevaSesion?.user?.user_metadata?.rol || rolGuardado
-      ).toLowerCase();
-
-      const destino =
-        rolFinal === "propietario" || rolFinal === "admin"
-          ? "/dashboard/propietario"
-          : rolFinal === "tutor" || rolFinal === "padre"
-          ? "/dashboard/tutor"
-          : "/dashboard/asistente";
-
-      // CRÍTICO: usar window.location.href (hard redirect), NO router.push().
-      // router.push() es navegación interna de Next.js y puede reutilizar
-      // el estado de sesión en memoria todavía inválido.
-      // window.location.href fuerza la recarga completa del browser,
-      // que lee la sesión fresca de localStorage de Supabase.
-      if (loginError) {
-        window.location.href = "/login";
-        return;
-      }
-
-      window.location.href = destino;
+      // Hard redirect: fuerza recarga completa para limpiar cualquier estado
+      // en memoria de Next.js / Supabase client.
+      window.location.href = "/login?passwordChanged=1";
     } catch {
       setError("No se pudo conectar con el servidor. Revisa tu internet.");
     } finally {
@@ -170,9 +146,12 @@ export default function PrimerAccesoPage() {
           <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-green-800">¡Listo!</h2>
+          <h2 className="text-2xl font-bold text-green-800">¡Contraseña creada!</h2>
           <p className="text-green-700">
-            Tu contraseña fue guardada. Accediendo al sistema…
+            Tu contraseña fue guardada exitosamente.
+          </p>
+          <p className="text-green-600 text-sm">
+            Redirigiendo al inicio de sesión…
           </p>
           <Loader2 className="h-5 w-5 animate-spin text-green-500 mx-auto" />
         </div>
