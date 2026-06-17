@@ -53,8 +53,8 @@ const ErrorTooltip = ({ message }: { message?: string }) => {
     if (!message) return null;
     return (
         <div className="absolute top-full left-0 mt-1 z-50 animate-in fade-in zoom-in-95 duration-200 w-full min-w-[200px]">
-            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 transform rotate-45 shadow-sm z-10" />
-            <div className="relative bg-white border border-gray-200 text-gray-800 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
+            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white dark:bg-slate-900 border-t border-l border-gray-200 dark:border-slate-700 transform rotate-45 shadow-sm z-10" />
+            <div className="relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-100 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
                 <div className="bg-orange-500 text-white rounded-sm p-0.5 shrink-0 flex items-center justify-center w-4 h-4">
                     <span className="font-bold text-[10px]">!</span>
                 </div>
@@ -521,7 +521,7 @@ export default function PropietarioDashboard() {
 
                     {!isPromoteConfirming ? (
                         <div className="py-4 space-y-4">
-                            <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-800">
+                            <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-100 dark:border-amber-900/30 text-sm text-amber-800 dark:text-amber-300">
                                 <p className="font-semibold mb-2">Al ejecutar esta acción:</p>
                                 <ul className="list-disc list-inside space-y-1">
                                     <li>Alumnos de <strong>1° a 5°</strong> serán promovidos al siguiente grado.</li>
@@ -542,11 +542,11 @@ export default function PropietarioDashboard() {
                         // VISTA 2: Confirmación sin input, solo botones
                         <div className="py-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                             <div className="text-center space-y-3">
-                                <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                                <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                                    <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900">¿Estás absolutamente seguro?</h3>
-                                <p className="text-sm text-gray-500 px-4">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">¿Estás absolutamente seguro?</h3>
+                                <p className="text-sm text-gray-500 dark:text-slate-400 px-4">
                                     Esta acción modificará masivamente los grados de todos los estudiantes activos. No se puede deshacer fácilmente.
                                 </p>
                             </div>

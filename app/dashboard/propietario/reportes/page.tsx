@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import {
     Download, TrendingUp, Users, DollarSign, TrendingDown,
     Bus, UserCog, Bell, BarChart3, Loader2, AlertTriangle,
-    Wallet, FileSpreadsheet, FileText
+    Wallet, FileSpreadsheet, FileText, UserX, CalendarClock, Percent, Check
 } from "lucide-react"
 import {
     Bar, BarChart, Pie, PieChart, Cell, XAxis, YAxis,
-    CartesianGrid, ResponsiveContainer, Tooltip, Legend
+    CartesianGrid, ResponsiveContainer, Tooltip, Legend,
+    ComposedChart, Line
 } from "recharts"
 import jsPDF from "jspdf"
 import * as XLSX from "xlsx"
@@ -422,7 +423,62 @@ function generarPDF(data: any, periodo: string) {
         y += 12;
     }
 
-    // ── PÁGINA 3: Demografía Alumnos ─────────────────────────────
+    // ── PÁGINA 3: Cartera de Morosidad ───────────────────────────
+    doc.addPage();
+    drawPDFHeader(doc, fecha, periodo);
+    y = 55;
+
+    y = drawSectionTitle(doc, 'Cartera de Morosidad', '¿Cuántos deben y en qué meses?', y, [239, 68, 68]);
+
+    // KPIs de cobranza
+    const kpiMW = (pw - 28 - 9) / 4;
+    drawKPICard(doc, 14, y, kpiMW, 'Deuda Pendiente', `C$ ${(data.kpi?.deudaTotal || 0).toLocaleString()}`, 'Meses vencidos', [239, 68, 68]);
+    drawKPICard(doc, 14 + kpiMW + 3, y, kpiMW, 'Familias que Deben', String(data.kpi?.familiasMorosas || 0), 'Con saldo pendiente', [245, 158, 11]);
+    drawKPICard(doc, 14 + (kpiMW + 3) * 2, y, kpiMW, 'Alumnos con Deuda', String(data.kpi?.alumnosMorosos || 0), 'Mensualidad atrasada', [139, 92, 246]);
+    drawKPICard(doc, 14 + (kpiMW + 3) * 3, y, kpiMW, 'Tasa de Cobro', `${data.kpi?.tasaCobro ?? 100}%`, 'Recaudado vs esperado', [16, 185, 129]);
+    y += 38;
+
+    // Deuda por mes (cuántos deben en cada mes)
+    if (data.deudaPorMes && data.deudaPorMes.length > 0) {
+        const chartMora = data.deudaPorMes.map((d: any) => ({
+            label: d.mes,
+            value: d.deudores || 0,
+            color: '#ef4444',
+        }));
+        drawBarChart(doc, chartMora, 14, y, pw - 28, 55, 'Nº de alumnos que deben por mes');
+        y += 62;
+
+        y = drawSectionTitle(doc, 'Deuda por Mes', '', y, [239, 68, 68]);
+        const hMes = ['Mes', 'Alumnos que deben', 'Monto adeudado (C$)'];
+        const cMes = [50, 60, 72];
+        const rMes = data.deudaPorMes.map((d: any) => [
+            d.mes || '',
+            String(d.deudores || 0),
+            (d.monto || 0).toLocaleString(),
+        ]);
+        y = drawTable(doc, hMes, rMes, y, cMes, [239, 68, 68]);
+        y += 10;
+    }
+
+    // Detalle de familias morosas
+    if (data.morosos && data.morosos.length > 0) {
+        doc.addPage();
+        drawPDFHeader(doc, fecha, periodo);
+        y = 55;
+        y = drawSectionTitle(doc, 'Familias con Pagos Pendientes', 'Ordenadas por monto adeudado', y, [239, 68, 68]);
+        const hMor = ['Familia / Tutor', 'Meses que adeuda', 'Alumnos', 'Deuda (C$)'];
+        const cMor = [50, 62, 24, 46];
+        const rMor = data.morosos.map((m: any) => [
+            m.familia || 'Sin Tutor',
+            (m.meses || []).join(', '),
+            String((m.alumnos || []).length),
+            (m.monto || 0).toLocaleString(),
+        ]);
+        y = drawTable(doc, hMor, rMor, y, cMor, [239, 68, 68]);
+        y += 10;
+    }
+
+    // ── PÁGINA: Demografía Alumnos ───────────────────────────────
     doc.addPage();
     drawPDFHeader(doc, fecha, periodo);
     y = 55;
@@ -567,6 +623,48 @@ function generarExcel(data: any, periodo: string) {
         XLSX.utils.book_append_sheet(wb, ws, 'Estado de Pagos');
     }
 
+    // ── Hoja: Deuda por Mes ──────────────────────────────────────
+    if (data.deudaPorMes && data.deudaPorMes.length > 0) {
+        const totalDeuda = data.deudaPorMes.reduce((s: number, d: any) => s + (d.monto || 0), 0);
+        const rows = [
+            ['CARTERA DE MOROSIDAD — DEUDA POR MES', '', ''],
+            ['Indicadores de cobranza', '', ''],
+            ['Deuda total pendiente (C$)', data.kpi?.deudaTotal || 0, ''],
+            ['Familias que deben', data.kpi?.familiasMorosas || 0, ''],
+            ['Alumnos con deuda', data.kpi?.alumnosMorosos || 0, ''],
+            ['Tasa de cobro (%)', `${data.kpi?.tasaCobro ?? 100}%`, ''],
+            [],
+            ['Mes', 'Alumnos que deben', 'Monto adeudado (C$)'],
+            ...data.deudaPorMes.map((d: any) => [d.mes || '', d.deudores || 0, d.monto || 0]),
+            [],
+            ['TOTAL', '', totalDeuda],
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 32 }, { wch: 20 }, { wch: 22 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Deuda por Mes');
+    }
+
+    // ── Hoja: Familias Morosas ───────────────────────────────────
+    if (data.morosos && data.morosos.length > 0) {
+        const rows = [
+            ['FAMILIAS CON PAGOS PENDIENTES', '', '', ''],
+            [`Fecha de generación: ${fecha}`, '', '', ''],
+            [],
+            ['Familia / Tutor', 'Meses que adeuda', 'Nº de alumnos', 'Deuda (C$)'],
+            ...data.morosos.map((m: any) => [
+                m.familia || 'Sin Tutor',
+                (m.meses || []).join(', '),
+                (m.alumnos || []).length,
+                m.monto || 0,
+            ]),
+            [],
+            ['TOTAL', '', '', data.morosos.reduce((s: number, m: any) => s + (m.monto || 0), 0)],
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = [{ wch: 30 }, { wch: 45 }, { wch: 15 }, { wch: 18 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'Familias Morosas');
+    }
+
     // ── Hoja 5: Demografía Alumnos ───────────────────────────────
     if (data.alumnosPorGrado && data.alumnosPorGrado.length > 0) {
         const totalAlumnos = data.alumnosPorGrado.reduce((s: number, d: any) => s + (d.alumnos || 0), 0) || 1;
@@ -630,7 +728,7 @@ export default function ReportesPage() {
                 'Content-Type': 'application/json'
             };
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reportes/dashboard`, { headers });
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reportes/dashboard?periodo=${periodo}`, { headers });
 
             if (!res.ok) {
                 if (res.status === 404 || res.status === 204) {
@@ -654,7 +752,8 @@ export default function ReportesPage() {
 
     useEffect(() => {
         fetchData();
-    }, [toast])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [periodo])
 
     // --- EXPORTAR PDF ---
     const handleExportarPDF = async () => {
@@ -711,7 +810,7 @@ export default function ReportesPage() {
                         <div key={i} className="flex items-center gap-2">
                             <div style={{ width: 8, height: 8, backgroundColor: p.color, borderRadius: '50%' }} />
                             <span className="capitalize">
-                                {p.name}: {['ingreso', 'gasto', 'monto', 'ingresos', 'gastos', 'valor'].some(k => p.dataKey?.toLowerCase().includes(k) || p.name?.toLowerCase().includes(k)) ? 'C$ ' : ''}
+                                {p.name}: {['ingreso', 'gasto', 'monto', 'ingresos', 'gastos'].some(k => p.dataKey?.toLowerCase().includes(k) || p.name?.toLowerCase().includes(k)) ? 'C$ ' : ''}
                                 {Number(p.value).toLocaleString()}
                             </span>
                         </div>
@@ -735,7 +834,7 @@ export default function ReportesPage() {
     if (error || !data || Object.keys(data).length === 0) {
         return (
             <DashboardLayout title="Reportes" menuItems={menuItems}>
-                <div className="flex flex-col justify-center items-center h-96 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100">
+                <div className="flex flex-col justify-center items-center h-96 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
                     <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
                     <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Sin datos suficientes</h3>
                     <p className="text-muted-foreground max-w-md mb-4">
@@ -809,7 +908,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                    C$ {data.kpi.ingresosTotales.toLocaleString()}
+                                    C$ {(data.kpi?.ingresosTotales || 0).toLocaleString()}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Histórico acumulado</p>
                             </CardContent>
@@ -821,7 +920,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                                    C$ {data.kpi.gastosTotales.toLocaleString()}
+                                    C$ {(data.kpi?.gastosTotales || 0).toLocaleString()}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Operativos y Mantenimiento</p>
                             </CardContent>
@@ -833,7 +932,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    C$ {data.kpi.beneficioNeto.toLocaleString()}
+                                    C$ {(data.kpi?.beneficioNeto || 0).toLocaleString()}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Ingresos - Gastos</p>
                             </CardContent>
@@ -854,9 +953,10 @@ export default function ReportesPage() {
 
                     {/* ---- TABS DE GRÁFICAS ---- */}
                     <Tabs defaultValue="general" className="space-y-4">
-                        <TabsList>
+                        <TabsList className="flex-wrap h-auto">
                             <TabsTrigger value="general">Finanzas General</TabsTrigger>
                             <TabsTrigger value="vehiculos">Rentabilidad x Unidad</TabsTrigger>
+                            <TabsTrigger value="morosidad">Morosidad</TabsTrigger>
                             <TabsTrigger value="pagos">Estado de Cartera</TabsTrigger>
                             <TabsTrigger value="alumnos">Demografía</TabsTrigger>
                         </TabsList>
@@ -905,11 +1005,146 @@ export default function ReportesPage() {
                             </Card>
                         </TabsContent>
 
+                        <TabsContent value="morosidad" className="space-y-4">
+                            {/* KPIs de cobranza */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <Card>
+                                    <CardHeader className="pb-2 flex-row items-center justify-between">
+                                        <CardDescription>Deuda Pendiente</CardDescription>
+                                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                                            C$ {(data.kpi?.deudaTotal || 0).toLocaleString()}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">Meses ya vencidos</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2 flex-row items-center justify-between">
+                                        <CardDescription>Familias que Deben</CardDescription>
+                                        <UserX className="w-4 h-4 text-orange-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                                            {data.kpi?.familiasMorosas || 0}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">{data.kpi?.alumnosMorosos || 0} alumnos con atraso</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2 flex-row items-center justify-between">
+                                        <CardDescription>Tasa de Cobro</CardDescription>
+                                        <Percent className="w-4 h-4 text-green-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                            {data.kpi?.tasaCobro ?? 100}%
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">Recaudado vs. esperado</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2 flex-row items-center justify-between">
+                                        <CardDescription>Alumnos al Día</CardDescription>
+                                        <Users className="w-4 h-4 text-blue-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-foreground">
+                                            {data.kpi?.alumnosAlDia || 0}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">Sin saldo pendiente</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Gráfica: cuántos deben y en qué meses */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <CalendarClock className="w-5 h-5 text-red-500" /> ¿Cuántos deben y en qué meses?
+                                    </CardTitle>
+                                    <CardDescription>Alumnos con saldo pendiente y monto adeudado por mes vencido</CardDescription>
+                                </CardHeader>
+                                <CardContent className="h-[400px] w-full">
+                                    {(data.deudaPorMes && data.deudaPorMes.length > 0) ? (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <ComposedChart data={data.deudaPorMes}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartTheme.gridColor} />
+                                                <XAxis dataKey="mes" stroke={chartTheme.textColor} fontSize={12} />
+                                                <YAxis yAxisId="left" stroke={chartTheme.textColor} fontSize={12} allowDecimals={false} />
+                                                <YAxis yAxisId="right" orientation="right" stroke={chartTheme.textColor} fontSize={12} tickFormatter={(v) => `C$${v / 1000}k`} />
+                                                <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? '#33415540' : '#f1f5f980' }} />
+                                                <Legend />
+                                                <Bar yAxisId="left" dataKey="deudores" name="Alumnos que deben" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={36} />
+                                                <Line yAxisId="right" type="monotone" dataKey="monto" name="Monto adeudado" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                                            </ComposedChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                                            <Check className="w-12 h-12 text-green-500 mb-3" />
+                                            <p className="font-medium">¡Nadie debe!</p>
+                                            <p className="text-sm">No hay saldos pendientes en los meses vencidos.</p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Tabla: familias morosas */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Familias con Pagos Pendientes</CardTitle>
+                                    <CardDescription>Ordenadas por monto adeudado</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {(data.morosos && data.morosos.length > 0) ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="border-b text-muted-foreground text-left">
+                                                        <th className="py-2 pr-4 font-medium">Familia / Tutor</th>
+                                                        <th className="py-2 pr-4 font-medium">Alumnos</th>
+                                                        <th className="py-2 pr-4 font-medium">Meses que adeuda</th>
+                                                        <th className="py-2 pr-4 font-medium text-right">Deuda</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {data.morosos.map((m: any, i: number) => (
+                                                        <tr key={i} className="border-b last:border-0 hover:bg-muted/30">
+                                                            <td className="py-2 pr-4 font-medium">{m.familia}</td>
+                                                            <td className="py-2 pr-4 text-muted-foreground">{(m.alumnos || []).join(', ')}</td>
+                                                            <td className="py-2 pr-4">
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {(m.meses || []).map((mes: string) => (
+                                                                        <span key={mes} className="px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
+                                                                            {mes}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-2 pr-4 text-right font-bold text-red-600 dark:text-red-400 whitespace-nowrap">
+                                                                C$ {(m.monto || 0).toLocaleString()}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <Check className="w-10 h-10 text-green-500 mx-auto mb-2" />
+                                            Todas las familias están al día. 🎉
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
                         <TabsContent value="pagos">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Estado de Pagos</CardTitle>
-                                    <CardDescription>Porcentaje de cumplimiento mensual</CardDescription>
+                                    <CardTitle>Estado de Cartera</CardTitle>
+                                    <CardDescription>Alumnos al día vs. con deuda (meses vencidos)</CardDescription>
                                 </CardHeader>
                                 <CardContent className="h-[400px] w-full flex justify-center">
                                     <ResponsiveContainer width="100%" height="100%" minWidth={300}>

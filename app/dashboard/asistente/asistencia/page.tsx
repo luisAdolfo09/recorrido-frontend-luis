@@ -221,11 +221,11 @@ export default function RegistrarAsistenciaPage() {
                 <div
                   key={a.id}
                   className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 border rounded-lg gap-3 transition-colors ${
-                    isAusente ? "bg-red-50 dark:bg-red-900/10 border-red-200" : "hover:bg-muted/50"
+                    isAusente ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : "hover:bg-muted/50"
                   }`}
                 >
                   <div className="flex items-start gap-3 w-full sm:w-auto">
-                    <div className={`mt-1 p-2 rounded-full ${isAusente ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'}`}>
+                    <div className={`mt-1 p-2 rounded-full ${isAusente ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
                         <User className="h-4 w-4" />
                     </div>
                     <div>
@@ -245,7 +245,7 @@ export default function RegistrarAsistenciaPage() {
                     size="sm"
                     onClick={() => toggleAusente(a.id)}
                     disabled={sending}
-                    className={`w-full sm:w-32 justify-between ${!isAusente && "text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"}`}
+                    className={`w-full sm:w-32 justify-between ${!isAusente && "text-green-600 dark:text-green-400 border-green-200 dark:border-green-900/30 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300"}`}
                   >
                     {isAusente ? (
                       <>
@@ -292,11 +292,11 @@ export default function RegistrarAsistenciaPage() {
                   <span>Total Alumnos:</span>
                   <span className="font-medium">{alumnos.length}</span>
                 </div>
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 dark:text-green-400">
                   <span>Presentes:</span>
                   <span className="font-bold">{alumnos.length - ausentes.length}</span>
                 </div>
-                <div className="flex justify-between text-red-600">
+                <div className="flex justify-between text-red-600 dark:text-red-400">
                   <span>Ausentes:</span>
                   <span className="font-bold">{ausentes.length}</span>
                 </div>

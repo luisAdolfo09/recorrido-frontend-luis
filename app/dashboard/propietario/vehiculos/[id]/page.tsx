@@ -289,9 +289,9 @@ export default function EditarVehiculoPage() {
   if (error) {
     return (
       <DashboardLayout title="Editar Vehículo" menuItems={menuItems}>
-        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
           <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-          <h3 className="text-lg font-bold text-red-700 mb-2">Error al cargar vehículo</h3>
+          <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar vehículo</h3>
           <p className="text-muted-foreground max-w-md">{error}</p>
           <Button className="mt-4" onClick={() => router.push("/dashboard/propietario/vehiculos")}>
             Volver a la lista

@@ -71,8 +71,8 @@ export default function PrimerAccesoPage() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
     if (password !== confirm) {
@@ -131,7 +131,7 @@ export default function PrimerAccesoPage() {
   // ── Vista de carga de sesión ─────────────────────────────────────────────
   if (loadingSession) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
         <p className="text-muted-foreground text-sm">Verificando sesión…</p>
       </div>
@@ -141,19 +141,19 @@ export default function PrimerAccesoPage() {
   // ── Vista de éxito ────────────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-green-50 dark:bg-green-900/20 p-4">
         <div className="text-center space-y-4 animate-in fade-in zoom-in duration-400">
-          <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+            <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold text-green-800">¡Contraseña creada!</h2>
-          <p className="text-green-700">
+          <h2 className="text-2xl font-bold text-green-800 dark:text-green-400">¡Contraseña creada!</h2>
+          <p className="text-green-700 dark:text-green-400">
             Tu contraseña fue guardada exitosamente.
           </p>
-          <p className="text-green-600 text-sm">
+          <p className="text-green-600 dark:text-green-400 text-sm">
             Redirigiendo al inicio de sesión…
           </p>
-          <Loader2 className="h-5 w-5 animate-spin text-green-500 mx-auto" />
+          <Loader2 className="h-5 w-5 animate-spin text-green-500 dark:text-green-400 mx-auto" />
         </div>
       </div>
     );
@@ -186,8 +186,8 @@ export default function PrimerAccesoPage() {
 
         <CardContent>
           {/* Aviso de seguridad */}
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-5 text-sm text-amber-800">
-            <Lock className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
+          <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/30 rounded-lg px-4 py-3 mb-5 text-sm text-amber-800 dark:text-amber-300">
+            <Lock className="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-300" />
             <span>
               Estás usando una <strong>contraseña temporal</strong>. Por
               seguridad, debes crear una contraseña propia antes de continuar.
@@ -202,7 +202,7 @@ export default function PrimerAccesoPage() {
                 <Input
                   id="pass"
                   type={showPass ? "text" : "password"}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -241,7 +241,7 @@ export default function PrimerAccesoPage() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+              <div className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-900/30">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>

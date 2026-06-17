@@ -348,7 +348,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                 <div className="flex justify-between items-end">
                                     <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider">Estudiantes ({hijos.length})</h3>
                                     <div className="w-48">
-                                        <Label className="text-xs mb-1 block text-right font-medium text-green-600">Mensualidad Familiar (C$)</Label>
+                                        <Label className="text-xs mb-1 block text-right font-medium text-green-600 dark:text-green-400">Mensualidad Familiar (C$)</Label>
                                         <Input 
                                             type="number" 
                                             min={700}
@@ -358,7 +358,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                                 if (e.target.value !== "" && val < 0) return;
                                                 redistribuirPrecio(val);
                                             }}
-                                            className="text-right font-bold text-lg border-green-200"
+                                            className="text-right font-bold text-lg border-green-200 dark:border-green-900/30"
                                         />
                                     </div>
                                 </div>

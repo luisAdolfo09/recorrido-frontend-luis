@@ -59,13 +59,13 @@ export default function RecuperarContrasenaPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <Card className="w-full max-w-md text-center p-8 border-green-200 bg-green-50 shadow-lg animate-in fade-in zoom-in duration-300">
-           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <KeyRound className="h-8 w-8 text-green-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+        <Card className="w-full max-w-md text-center p-8 border-green-200 dark:border-green-900/30 bg-green-50 dark:bg-green-900/20 shadow-lg animate-in fade-in zoom-in duration-300">
+           <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
+              <KeyRound className="h-8 w-8 text-green-600 dark:text-green-400" />
            </div>
-           <h2 className="text-xl font-bold text-green-800 mb-2">¡Enlace listo para enviarse!</h2>
-           <p className="text-green-700/80 mb-6 text-sm leading-relaxed">
+           <h2 className="text-xl font-bold text-green-800 dark:text-green-400 mb-2">¡Enlace listo para enviarse!</h2>
+           <p className="text-green-700/80 dark:text-green-400 mb-6 text-sm leading-relaxed">
               El administrador del sistema ya puede enviarte un enlace seguro por WhatsApp para que restablezcas tu contraseña. 
               <br/><br/>
               <b>Por favor, avísale al administrador que solicitaste un cambio.</b>
@@ -82,7 +82,7 @@ export default function RecuperarContrasenaPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
       <Card className="w-full max-w-md shadow-lg border-t-4 border-t-secondary/80">
         <CardHeader className="space-y-3">
           <Button 

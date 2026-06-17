@@ -172,11 +172,11 @@ export default function AsistenteDashboard() {
         </Card>
         <Card>
             <CardHeader className="pb-2 flex flex-row items-center gap-2"><UserCheck className="h-4 w-4 text-muted-foreground" /><CardDescription>Presentes Hoy</CardDescription></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-green-600">{resumen.stats.presentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Alumnos a bordo</p></CardContent>
+            <CardContent><div className="text-2xl font-bold text-green-600 dark:text-green-400">{resumen.stats.presentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Alumnos a bordo</p></CardContent>
         </Card>
         <Card>
             <CardHeader className="pb-2 flex flex-row items-center gap-2"><UserX className="h-4 w-4 text-muted-foreground" /><CardDescription>Ausentes Hoy</CardDescription></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-red-600">{resumen.stats.ausentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Marcados ausentes</p></CardContent>
+            <CardContent><div className="text-2xl font-bold text-red-600 dark:text-red-400">{resumen.stats.ausentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Marcados ausentes</p></CardContent>
         </Card>
       </div>
     </AsistenteLayout>

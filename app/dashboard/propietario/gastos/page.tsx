@@ -23,12 +23,14 @@ import {
     BarChart3, 
     TrendingDown,
     Loader2,
-    AlertTriangle
+    AlertTriangle,
+    FileSpreadsheet,
+    FileText
 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase" // <--- Importamos Supabase
-import type { RequestInit } from "next/dist/server/web/spec-extension/request" // Para tipado de fetch
+import { ReportPDF, exportExcel, REPORT_COLORS, fmtMoney, type RGB } from "@/lib/report-utils"
 
 // --- TIPO GASTO (ACTUALIZADO) ---
 export type Gasto = {
@@ -86,6 +88,7 @@ export default function GastosPage() {
     const [estadoFilter, setEstadoFilter] = useState("activo"); 
     const [categoriaFilter, setCategoriaFilter] = useState("combustible");
     const [vehiculoFilter, setVehiculoFilter] = useState("todos");
+    const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
     const { toast } = useToast()
 
     // --- Cargar Gastos y Vehículos ---
@@ -250,7 +253,264 @@ export default function GastosPage() {
             toast({ title: "Error", description: (err as Error).message, variant: "destructive" });
         }
     }
-    
+
+    // --- HELPERS DE AGRUPACIÓN PARA REPORTES ---
+    const COLOR_CATEGORIA: Record<string, RGB> = {
+        combustible: REPORT_COLORS.red,
+        mantenimiento: REPORT_COLORS.orange,
+        salarios: REPORT_COLORS.indigo,
+        otros: REPORT_COLORS.slate,
+    };
+
+    const construirDatosReporte = () => {
+        const periodoLabel = `Gastos ${estadoFilter === 'activo' ? 'activos' : 'inactivos'}`;
+
+        // KPIs
+        const categoriasDistintas = new Set(gastos.map(g => g.categoria));
+        const vehiculosConGasto = new Set(gastos.filter(g => g.vehiculoId).map(g => g.vehiculoId));
+
+        // Por categoría
+        const catMap = new Map<string, { count: number; monto: number }>();
+        gastos.forEach(g => {
+            const prev = catMap.get(g.categoria) || { count: 0, monto: 0 };
+            catMap.set(g.categoria, { count: prev.count + 1, monto: prev.monto + (g.monto || 0) });
+        });
+        const porCategoria = Array.from(catMap.entries())
+            .map(([categoria, v]) => ({ categoria, ...v }))
+            .sort((a, b) => b.monto - a.monto);
+
+        // Por mes (YYYY-MM)
+        const mesMap = new Map<string, { count: number; monto: number }>();
+        gastos.forEach(g => {
+            const key = (g.fecha || "").substring(0, 7);
+            if (!key) return;
+            const prev = mesMap.get(key) || { count: 0, monto: 0 };
+            mesMap.set(key, { count: prev.count + 1, monto: prev.monto + (g.monto || 0) });
+        });
+        const porMes = Array.from(mesMap.entries())
+            .map(([key, v]) => ({
+                key,
+                legible: capitalizar(new Date(key + "-01T00:00:00").toLocaleDateString("es-NI", { month: "long", year: "numeric" })),
+                ...v,
+            }))
+            .sort((a, b) => a.key.localeCompare(b.key));
+
+        // Por vehículo
+        const vehMap = new Map<string, { count: number; monto: number }>();
+        gastos.filter(g => g.vehiculoId).forEach(g => {
+            const nombre = g.vehiculo?.nombre || "Sin asignar";
+            const prev = vehMap.get(nombre) || { count: 0, monto: 0 };
+            vehMap.set(nombre, { count: prev.count + 1, monto: prev.monto + (g.monto || 0) });
+        });
+        const porVehiculo = Array.from(vehMap.entries())
+            .map(([nombre, v]) => ({ nombre, ...v }))
+            .sort((a, b) => b.monto - a.monto);
+
+        // Por personal
+        const persMap = new Map<string, { count: number; monto: number }>();
+        gastos.filter(g => g.personalId).forEach(g => {
+            const nombre = g.personal?.nombre || "Sin asignar";
+            const prev = persMap.get(nombre) || { count: 0, monto: 0 };
+            persMap.set(nombre, { count: prev.count + 1, monto: prev.monto + (g.monto || 0) });
+        });
+        const porPersonal = Array.from(persMap.entries())
+            .map(([nombre, v]) => ({ nombre, ...v }))
+            .sort((a, b) => b.monto - a.monto);
+
+        return {
+            periodoLabel,
+            categoriasDistintas,
+            vehiculosConGasto,
+            porCategoria,
+            porMes,
+            porVehiculo,
+            porPersonal,
+        };
+    };
+
+    const handleExportarPDF = async () => {
+        setExporting('pdf');
+        try {
+            const d = construirDatosReporte();
+
+            const pdf = new ReportPDF({
+                titulo: "REPORTE DE GASTOS",
+                subtitulo: "Gestión de Gastos Operativos",
+                periodoLabel: d.periodoLabel,
+                accent: REPORT_COLORS.red,
+            });
+
+            // 1. KPIs
+            pdf.kpis([
+                { label: "Gasto Total", value: "C$ " + fmtMoney(totalGastado), color: REPORT_COLORS.red },
+                { label: "Gasto del Mes", value: "C$ " + fmtMoney(gastoDelMes), color: REPORT_COLORS.orange },
+                { label: "Nº Registros", value: String(gastos.length), color: REPORT_COLORS.blue },
+                { label: "Categorías", value: String(d.categoriasDistintas.size), color: REPORT_COLORS.purple },
+                { label: "Vehículos con Gasto", value: String(d.vehiculosConGasto.size), color: REPORT_COLORS.indigo },
+            ]);
+
+            // 2. Gastos por Categoría
+            pdf.sectionTitle("Gastos por Categoría");
+            pdf.stackedBar(
+                d.porCategoria.map(c => ({
+                    label: capitalizar(c.categoria),
+                    value: c.monto,
+                    color: COLOR_CATEGORIA[c.categoria] || REPORT_COLORS.slate,
+                })),
+                "Distribución por categoría"
+            );
+            const totalCatMonto = d.porCategoria.reduce((s, c) => s + c.monto, 0);
+            const totalCatCount = d.porCategoria.reduce((s, c) => s + c.count, 0);
+            pdf.table(
+                ["Categoría", "Nº", "Monto (C$)", "%"],
+                [
+                    ...d.porCategoria.map(c => [
+                        capitalizar(c.categoria),
+                        c.count,
+                        fmtMoney(c.monto),
+                        (totalCatMonto > 0 ? (c.monto / totalCatMonto * 100) : 0).toFixed(1) + "%",
+                    ]),
+                    ["TOTAL", totalCatCount, fmtMoney(totalCatMonto), "100.0%"],
+                ],
+                { align: ["left", "center", "right", "right"] }
+            );
+
+            // 3. Gastos por Mes
+            pdf.sectionTitle("Gastos por Mes");
+            pdf.table(
+                ["Mes", "Nº", "Monto (C$)"],
+                d.porMes.map(m => [m.legible, m.count, fmtMoney(m.monto)]),
+                { align: ["left", "center", "right"] }
+            );
+
+            // 4. Gastos por Vehículo (omitir si no hay)
+            if (d.porVehiculo.length > 0) {
+                pdf.sectionTitle("Gastos por Vehículo", undefined, REPORT_COLORS.orange);
+                pdf.table(
+                    ["Vehículo", "Nº", "Monto (C$)"],
+                    d.porVehiculo.map(v => [v.nombre, v.count, fmtMoney(v.monto)]),
+                    { align: ["left", "center", "right"] }
+                );
+            }
+
+            // 5. Salarios por Personal (omitir si no hay)
+            if (d.porPersonal.length > 0) {
+                pdf.sectionTitle("Salarios por Personal", undefined, REPORT_COLORS.indigo);
+                pdf.table(
+                    ["Personal", "Nº", "Monto (C$)"],
+                    d.porPersonal.map(p => [p.nombre, p.count, fmtMoney(p.monto)]),
+                    { align: ["left", "center", "right"] }
+                );
+            }
+
+            // 6. Detalle de Gastos
+            pdf.sectionTitle("Detalle de Gastos");
+            pdf.table(
+                ["Descripción", "Categoría", "Vehículo", "Personal", "Monto (C$)", "Fecha"],
+                gastos.map(g => [
+                    g.descripcion,
+                    capitalizar(g.categoria),
+                    g.vehiculo?.nombre || "-",
+                    g.personal?.nombre || "-",
+                    fmtMoney(g.monto || 0),
+                    g.fecha ? new Date(g.fecha + "T00:00:00").toLocaleDateString("es-NI") : "-",
+                ]),
+                {
+                    colWidths: [46, 26, 28, 28, 26, 28],
+                    align: ["left", "left", "left", "left", "right", "center"],
+                }
+            );
+
+            // 7. Nota
+            pdf.note([
+                "Reporte de gastos generado automáticamente.",
+                "Incluye únicamente los gastos en estado: " + estadoFilter + ".",
+            ]);
+
+            // 8. Guardar
+            pdf.save("Reporte_Gastos");
+
+            toast({ title: "Exportación exitosa", description: "El reporte PDF se generó correctamente." });
+        } catch (err: any) {
+            toast({ title: "Error al exportar PDF", description: (err as Error).message, variant: "destructive" });
+        } finally {
+            setExporting(null);
+        }
+    };
+
+    const handleExportarExcel = async () => {
+        setExporting('excel');
+        try {
+            const d = construirDatosReporte();
+            const totalCatMonto = d.porCategoria.reduce((s, c) => s + c.monto, 0);
+            const totalCatCount = d.porCategoria.reduce((s, c) => s + c.count, 0);
+
+            const resumen: (string | number)[][] = [
+                ["KPI", "Valor"],
+                ["Gasto Total (C$)", fmtMoney(totalGastado)],
+                ["Gasto del Mes (C$)", fmtMoney(gastoDelMes)],
+                ["Nº Registros", gastos.length],
+                ["Categorías", d.categoriasDistintas.size],
+                ["Vehículos con Gasto", d.vehiculosConGasto.size],
+                ["Periodo", d.periodoLabel],
+            ];
+
+            const porCategoria: (string | number)[][] = [
+                ["Categoría", "Nº", "Monto (C$)", "%"],
+                ...d.porCategoria.map(c => [
+                    capitalizar(c.categoria),
+                    c.count,
+                    fmtMoney(c.monto),
+                    (totalCatMonto > 0 ? (c.monto / totalCatMonto * 100) : 0).toFixed(1) + "%",
+                ]),
+                ["TOTAL", totalCatCount, fmtMoney(totalCatMonto), "100.0%"],
+            ];
+
+            const porMes: (string | number)[][] = [
+                ["Mes", "Periodo", "Nº", "Monto (C$)"],
+                ...d.porMes.map(m => [m.legible, m.key, m.count, fmtMoney(m.monto)]),
+            ];
+
+            const porVehiculo: (string | number)[][] = [
+                ["Vehículo", "Nº", "Monto (C$)"],
+                ...d.porVehiculo.map(v => [v.nombre, v.count, fmtMoney(v.monto)]),
+            ];
+
+            const porPersonal: (string | number)[][] = [
+                ["Personal", "Nº", "Monto (C$)"],
+                ...d.porPersonal.map(p => [p.nombre, p.count, fmtMoney(p.monto)]),
+            ];
+
+            const detalle: (string | number)[][] = [
+                ["Descripción", "Categoría", "Vehículo", "Personal", "Monto", "Fecha", "Estado"],
+                ...gastos.map(g => [
+                    g.descripcion,
+                    capitalizar(g.categoria),
+                    g.vehiculo?.nombre || "Sin asignar",
+                    g.personal?.nombre || "Sin asignar",
+                    fmtMoney(g.monto || 0),
+                    g.fecha ? new Date(g.fecha + "T00:00:00").toLocaleDateString("es-NI") : "-",
+                    capitalizar(g.estado),
+                ]),
+            ];
+
+            exportExcel("Reporte_Gastos", [
+                { name: "Resumen", aoa: resumen, cols: [26, 22] },
+                { name: "Por Categoría", aoa: porCategoria, cols: [22, 8, 18, 10] },
+                { name: "Por Mes", aoa: porMes, cols: [24, 12, 8, 18] },
+                { name: "Por Vehículo", aoa: porVehiculo, cols: [28, 8, 18] },
+                { name: "Por Personal", aoa: porPersonal, cols: [28, 8, 18] },
+                { name: "Detalle", aoa: detalle, cols: [34, 18, 22, 22, 14, 14, 12] },
+            ]);
+
+            toast({ title: "Exportación exitosa", description: "El reporte Excel se generó correctamente." });
+        } catch (err: any) {
+            toast({ title: "Error al exportar Excel", description: (err as Error).message, variant: "destructive" });
+        } finally {
+            setExporting(null);
+        }
+    };
+
     // --- MANEJO DE ESTADOS DE CARGA/ERROR ---
     if (loading) {
         return (
@@ -267,9 +527,9 @@ export default function GastosPage() {
     if (error && gastos.length === 0) {
         return (
             <DashboardLayout title="Gestión de Gastos" menuItems={menuItems}>
-                <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+                <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
                     <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-                    <h3 className="text-xl font-bold text-red-700 mb-2">Error al cargar datos iniciales</h3>
+                    <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar datos iniciales</h3>
                     <p className="text-muted-foreground max-w-md">{error}</p>
                     <Button className="mt-4" onClick={fetchDatos}>
                         Intentar de nuevo
@@ -375,12 +635,40 @@ export default function GastosPage() {
                         </Select>
                     </div>
 
-                    <Link href="/dashboard/propietario/gastos/nuevo" className="w-full sm:w-auto">
-                        <Button className="w-full">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Registrar Gasto
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            onClick={handleExportarExcel}
+                            disabled={exporting !== null}
+                        >
+                            {exporting === 'excel' ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                            )}
+                            Excel
                         </Button>
-                    </Link>
+                        <Button
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            onClick={handleExportarPDF}
+                            disabled={exporting !== null}
+                        >
+                            {exporting === 'pdf' ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                <FileText className="h-4 w-4 mr-2" />
+                            )}
+                            PDF
+                        </Button>
+                        <Link href="/dashboard/propietario/gastos/nuevo" className="w-full sm:w-auto">
+                            <Button className="w-full">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Registrar Gasto
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
 

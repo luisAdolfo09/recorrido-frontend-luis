@@ -154,11 +154,11 @@ export default function TutorDashboard() {
                 <div className="flex items-center gap-3 flex-1 w-full">
                   {hijo.estadoHoy === 'presente' && (
                     <>
-                      <div className="bg-green-100 p-3 rounded-full shrink-0">
-                        <CheckCircle2 className="h-8 w-8 text-green-600" />
+                      <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-full shrink-0">
+                        <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-green-700">A bordo</p>
+                        <p className="font-bold text-lg text-green-700 dark:text-green-400">A bordo</p>
                         <p className="text-sm text-muted-foreground">
                           Registrado: {hijo.horaRecogida ? new Date(hijo.horaRecogida).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                         </p>
@@ -167,22 +167,22 @@ export default function TutorDashboard() {
                   )}
                   {hijo.estadoHoy === 'ausente' && (
                     <>
-                      <div className="bg-red-100 p-3 rounded-full shrink-0">
-                        <AlertCircle className="h-8 w-8 text-red-600" />
+                      <div className="bg-red-100 dark:bg-red-900/20 p-3 rounded-full shrink-0">
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-red-700">Ausente</p>
+                        <p className="font-bold text-lg text-red-700 dark:text-red-400">Ausente</p>
                         <p className="text-sm text-muted-foreground">No asiste hoy.</p>
                       </div>
                     </>
                   )}
                   {hijo.estadoHoy === 'pendiente' && (
                     <>
-                      <div className="bg-yellow-100 p-3 rounded-full shrink-0">
-                        <Clock className="h-8 w-8 text-yellow-600" />
+                      <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-full shrink-0">
+                        <Clock className="h-8 w-8 text-yellow-600 dark:text-yellow-300" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-yellow-700">Esperando</p>
+                        <p className="font-bold text-lg text-yellow-700 dark:text-yellow-300">Esperando</p>
                         <p className="text-sm text-muted-foreground">Sin registro aún.</p>
                       </div>
                     </>
@@ -207,7 +207,7 @@ export default function TutorDashboard() {
                   <p className="text-xs text-muted-foreground">Saldo pendiente</p>
                 </div>
                 {data.pagos?.estado === 'al_dia' ? (
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">Al día</Badge>
+                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30">Al día</Badge>
                 ) : (
                     <Badge variant="destructive">Pendiente</Badge>
                 )}

@@ -8,29 +8,36 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { 
-    Plus, 
-    Search, 
-    Trash2, 
-    Users, 
-    DollarSign, 
-    Bus, 
-    UserCog, 
-    Bell, 
-    BarChart3, 
-    TrendingDown, 
-    List, 
-    LayoutGrid, 
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Plus,
+    Search,
+    Trash2,
+    Users,
+    DollarSign,
+    Bus,
+    UserCog,
+    Bell,
+    BarChart3,
+    TrendingDown,
+    List,
+    LayoutGrid,
     Loader2,
     AlertTriangle,
     ChevronDown,
     ChevronUp,
     // 👇 FIX: Agregar Check
-    Check
+    Check,
+    UserX,
+    CalendarClock,
+    FileSpreadsheet,
+    FileText
 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
+import { ReportPDF, exportExcel, REPORT_COLORS, fmtMoney } from "@/lib/report-utils"
 
 // --- DEFINICIÓN DE TIPOS ---
 export type Pago = {
@@ -74,6 +81,16 @@ const MESES_CUADERNO = [
 
 const MESES_FILTRO = ["Todos", ...MESES_CUADERNO];
 
+// Meses escolares base (sin año). El índice + 1 coincide con el mes JS (Febrero = getMonth() 1).
+const MESES_ESCOLARES_BASE = [
+    "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
+    "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+const MES_ACTUAL_JS = new Date().getMonth();
+// Meses ya vencidos (incluye el mes actual). Solo estos se consideran "deuda".
+const MESES_VENCIDOS_BASE = MESES_ESCOLARES_BASE.filter((_, i) => i + 1 <= MES_ACTUAL_JS);
+const MESES_VENCIDOS_COUNT = MESES_VENCIDOS_BASE.length;
+
 const GRADO_ORDER = [
     "1° Preescolar", "2° Preescolar", "3° Preescolar",
     "1° Primaria", "2° Primaria", "3° Primaria",
@@ -97,6 +114,8 @@ export default function PagosPage() {
     
     const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(new Set());
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeudores, setShowDeudores] = useState(false);
+    const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
     // --- CARGAR DATOS ---
     const fetchDatos = async () => {
@@ -193,7 +212,8 @@ export default function PagosPage() {
              let totalEsperado = 0;
 
              if (cardMonthFilter === "Todos") {
-                 totalEsperado = alumnosFamilia.reduce((sum, a) => sum + (Number(a.precio) || 0) * 11, 0);
+                 // Solo los meses ya vencidos cuentan como deuda (no los futuros)
+                 totalEsperado = alumnosFamilia.reduce((sum, a) => sum + (Number(a.precio) || 0) * MESES_VENCIDOS_COUNT, 0);
              } else {
                  totalEsperado = alumnosFamilia.reduce((sum, a) => sum + (Number(a.precio) || 0), 0);
              }
@@ -276,24 +296,101 @@ export default function PagosPage() {
     [filteredPagosBase]);
     
     const totalPendiente = useMemo(() => {
-        const totalTeoricoAnual = alumnos.reduce((sum, alumno) => sum + (Number(alumno.precio) || 0) * 11, 0);
-        const totalPagadoAnual = pagos
-            .filter(p => p.estado === 'pagado' && p.mes.includes(ANIO_ESCOLAR)) 
-            .reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
+        // Índice alumnoId -> mes -> monto pagado
+        const pagosMap = new Map<string, Map<string, number>>();
+        pagos.forEach(p => {
+            if (p.estado !== 'pagado') return;
+            if (!pagosMap.has(p.alumnoId)) pagosMap.set(p.alumnoId, new Map());
+            const m = pagosMap.get(p.alumnoId)!;
+            m.set(p.mes, (m.get(p.mes) || 0) + Number(p.monto || 0));
+        });
+
+        // Saldo pendiente de un mes concreto, sumando solo lo que falta por alumno
+        const saldoDelMes = (mesKey: string) => {
+            let saldo = 0;
+            for (const a of alumnos) {
+                const precio = Number(a.precio) || 0;
+                if (precio <= 0) continue;
+                const pagado = pagosMap.get(a.id)?.get(mesKey) || 0;
+                const s = precio - pagado;
+                if (s > 0.01) saldo += s;
+            }
+            return saldo;
+        };
 
         if (cardMonthFilter !== "Todos") {
-            const totalTeoricoDelMes = alumnos.reduce((sum, alumno) => sum + (Number(alumno.precio) || 0), 0);
-            const totalPagadoEseMes = pagos
-                .filter(p => p.mes === cardMonthFilter && p.estado === 'pagado')
-                .reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
-            const saldo = totalTeoricoDelMes - totalPagadoEseMes;
-            return saldo < 0 ? 0 : saldo;
+            return saldoDelMes(cardMonthFilter);
         }
-        const saldoAnual = totalTeoricoAnual - totalPagadoAnual;
-        return saldoAnual < 0 ? 0 : saldoAnual;
-    }, [pagos, alumnos, cardMonthFilter, ANIO_ESCOLAR]);
+        // Anual: solo contamos los meses que ya están vencidos (no los futuros)
+        return MESES_VENCIDOS_BASE.reduce(
+            (sum, mesBase) => sum + saldoDelMes(`${mesBase} ${ANIO_ESCOLAR}`),
+            0
+        );
+    }, [pagos, alumnos, cardMonthFilter]);
     
     const totalRegistros = useMemo(() => filteredPagosBase.length, [filteredPagosBase]);
+
+    // --- ¿QUIÉNES DEBEN? (solo meses ya vencidos) ---
+    const deudoresData = useMemo(() => {
+        // Índice rápido: alumnoId -> (mes -> monto pagado)
+        const pagosMap = new Map<string, Map<string, number>>();
+        pagos.forEach(p => {
+            if (p.estado !== 'pagado') return;
+            if (!pagosMap.has(p.alumnoId)) pagosMap.set(p.alumnoId, new Map());
+            const m = pagosMap.get(p.alumnoId)!;
+            m.set(p.mes, (m.get(p.mes) || 0) + Number(p.monto || 0));
+        });
+
+        type FamiliaDeuda = {
+            tutor: string;
+            total: number;
+            meses: string[];
+            alumnos: { nombre: string; meses: string[]; monto: number }[];
+        };
+        const familias = new Map<string, { tutor: string; total: number; meses: Set<string>; alumnos: { nombre: string; meses: string[]; monto: number }[] }>();
+
+        for (const a of alumnos) {
+            const precio = Number(a.precio) || 0;
+            if (precio <= 0) continue;
+            const pagosA = pagosMap.get(a.id) || new Map<string, number>();
+
+            const mesesDebe: string[] = [];
+            let montoAlumno = 0;
+            for (const mesBase of MESES_VENCIDOS_BASE) {
+                const mesKey = `${mesBase} ${ANIO_ESCOLAR}`;
+                const pagado = pagosA.get(mesKey) || 0;
+                const saldo = precio - pagado;
+                if (saldo > 0.01) {
+                    mesesDebe.push(mesBase);
+                    montoAlumno += saldo;
+                }
+            }
+            if (mesesDebe.length === 0) continue;
+
+            const tutor = a.tutor || "Sin Tutor";
+            if (!familias.has(tutor)) familias.set(tutor, { tutor, total: 0, meses: new Set(), alumnos: [] });
+            const f = familias.get(tutor)!;
+            f.total += montoAlumno;
+            mesesDebe.forEach(m => f.meses.add(m));
+            f.alumnos.push({ nombre: a.nombre, meses: mesesDebe, monto: montoAlumno });
+        }
+
+        const lista: FamiliaDeuda[] = Array.from(familias.values())
+            .map(f => ({
+                tutor: f.tutor,
+                total: f.total,
+                alumnos: f.alumnos,
+                meses: Array.from(f.meses).sort(
+                    (a, b) => MESES_ESCOLARES_BASE.indexOf(a) - MESES_ESCOLARES_BASE.indexOf(b)
+                ),
+            }))
+            .sort((a, b) => b.total - a.total);
+
+        const totalDeuda = lista.reduce((s, f) => s + f.total, 0);
+        const totalAlumnosMorosos = lista.reduce((s, f) => s + f.alumnos.length, 0);
+
+        return { lista, totalDeuda, totalFamilias: lista.length, totalAlumnosMorosos };
+    }, [pagos, alumnos]);
 
     // --- ELIMINAR PAGO DE FAMILIA (LOTE) ---
     const handleDeleteGroup = async (pagosIds: string[], mes: string, tutor: string) => {
@@ -335,6 +432,284 @@ export default function PagosPage() {
         setExpandedFamilies(newSet);
     };
 
+    // --- EXPORTACIÓN: HELPERS DE CÁLCULO ---
+    // Etiqueta de período para la cabecera del reporte.
+    const periodoLabel = cardMonthFilter === "Todos" ? `Año ${ANIO_ESCOLAR}` : cardMonthFilter;
+
+    // Recaudación por mes vencido (filas + total).
+    const buildRecaudacionPorMes = () => {
+        const esperadoMensual = alumnos.reduce(
+            (sum, a) => sum + (Number(a.precio) > 0 ? Number(a.precio) : 0),
+            0
+        );
+        const rows: { mes: string; recaudado: number; esperado: number; pendiente: number; cumpl: number }[] = [];
+        for (const mesBase of MESES_VENCIDOS_BASE) {
+            const mesKey = `${mesBase} ${ANIO_ESCOLAR}`;
+            const recaudado = pagos
+                .filter((p) => p.estado === "pagado" && p.mes === mesKey)
+                .reduce((s, p) => s + (Number(p.monto) || 0), 0);
+            const esperado = esperadoMensual;
+            const pendiente = Math.max(0, esperado - recaudado);
+            const cumpl = esperado > 0 ? Math.round((recaudado / esperado) * 100) : 100;
+            rows.push({ mes: mesBase, recaudado, esperado, pendiente, cumpl });
+        }
+        const totEsperado = rows.reduce((s, r) => s + r.esperado, 0);
+        const totRecaudado = rows.reduce((s, r) => s + r.recaudado, 0);
+        const totPendiente = rows.reduce((s, r) => s + r.pendiente, 0);
+        const totCumpl = totEsperado > 0 ? Math.round((totRecaudado / totEsperado) * 100) : 100;
+        return { rows, total: { recaudado: totRecaudado, esperado: totEsperado, pendiente: totPendiente, cumpl: totCumpl } };
+    };
+
+    // Detalle por familia (pagado anual por tutor + pendiente desde deudoresData).
+    const buildDetallePorFamilia = () => {
+        const pagadoPorTutor = new Map<string, number>();
+        for (const a of alumnos) {
+            if (!pagadoPorTutor.has(a.tutor)) pagadoPorTutor.set(a.tutor, 0);
+        }
+        for (const p of pagos) {
+            if (p.estado !== "pagado") continue;
+            const alumno = alumnos.find((a) => a.id === p.alumnoId);
+            if (!alumno) continue;
+            pagadoPorTutor.set(alumno.tutor, (pagadoPorTutor.get(alumno.tutor) || 0) + (Number(p.monto) || 0));
+        }
+        const filas = Array.from(pagadoPorTutor.entries()).map(([tutor, pagado]) => {
+            const deuda = deudoresData.lista.find((f) => f.tutor === tutor);
+            const pendiente = deuda?.total || 0;
+            return {
+                tutor,
+                pagado,
+                pendiente,
+                estado: pendiente > 0 ? "Debe" : "Al día",
+            };
+        });
+        filas.sort((a, b) => (b.pendiente - a.pendiente) || a.tutor.localeCompare(b.tutor));
+        return filas;
+    };
+
+    // --- EXPORTAR A PDF ---
+    const handleExportarPDF = async () => {
+        setExporting('pdf');
+        try {
+            const pdf = new ReportPDF({
+                titulo: "REPORTE DE PAGOS",
+                periodoLabel,
+                accent: REPORT_COLORS.green,
+            });
+
+            // 1. KPIs
+            pdf.kpis([
+                { label: "Total Recaudado", value: `C$ ${fmtMoney(totalPagado)}`, color: REPORT_COLORS.green },
+                { label: "Pendiente", value: `C$ ${fmtMoney(totalPendiente)}`, color: REPORT_COLORS.orange },
+                { label: "Registros", value: String(totalRegistros), color: REPORT_COLORS.blue },
+                { label: "Deuda Total", value: `C$ ${fmtMoney(deudoresData.totalDeuda)}`, color: REPORT_COLORS.red },
+                { label: "Familias con Deuda", value: String(deudoresData.totalFamilias), color: REPORT_COLORS.purple },
+            ]);
+
+            // 2. Recaudación por mes vencido
+            const recaudacion = buildRecaudacionPorMes();
+            pdf.sectionTitle("Recaudación por Mes Vencido", `Período: ${periodoLabel}`, REPORT_COLORS.green);
+            pdf.table(
+                ["Mes", "Recaudado (C$)", "Esperado (C$)", "Pendiente (C$)", "% Cumpl."],
+                [
+                    ...recaudacion.rows.map((r) => [
+                        r.mes,
+                        fmtMoney(r.recaudado),
+                        fmtMoney(r.esperado),
+                        fmtMoney(r.pendiente),
+                        `${r.cumpl}%`,
+                    ]),
+                    [
+                        "TOTAL",
+                        fmtMoney(recaudacion.total.recaudado),
+                        fmtMoney(recaudacion.total.esperado),
+                        fmtMoney(recaudacion.total.pendiente),
+                        `${recaudacion.total.cumpl}%`,
+                    ],
+                ],
+                { colWidths: [42, 35, 35, 35, 35], align: ["left", "right", "right", "right", "right"] }
+            );
+
+            // 3. Detalle por familia
+            const detalle = buildDetallePorFamilia();
+            pdf.sectionTitle("Detalle por Familia");
+            pdf.table(
+                ["Familia / Tutor", "Pagado (C$)", "Pendiente (C$)", "Estado"],
+                detalle.map((f) => [f.tutor, fmtMoney(f.pagado), fmtMoney(f.pendiente), f.estado]),
+                { colWidths: [82, 35, 35, 30], align: ["left", "right", "right", "center"] }
+            );
+
+            // 4. Familias con deuda
+            if (deudoresData.lista.length > 0) {
+                pdf.sectionTitle("Familias con Deuda", `${deudoresData.totalFamilias} familia(s)`, REPORT_COLORS.red);
+                pdf.table(
+                    ["Familia / Tutor", "Meses que adeuda", "Alumnos", "Deuda (C$)"],
+                    deudoresData.lista.map((f) => [
+                        f.tutor,
+                        f.meses.join(", "),
+                        String(f.alumnos.length),
+                        fmtMoney(f.total),
+                    ]),
+                    { colWidths: [55, 77, 20, 30], align: ["left", "left", "center", "right"] }
+                );
+            }
+
+            // 5. Nota
+            pdf.note([
+                "Reporte generado automáticamente por el Sistema de Gestión Recorrido Escolar.",
+                "La deuda se calcula solo sobre los meses ya vencidos del año escolar.",
+            ]);
+
+            // 6. Guardar
+            pdf.save("Reporte_Pagos");
+
+            toast({ title: "PDF generado", description: "El reporte de pagos se descargó correctamente." });
+        } catch (err: any) {
+            toast({ title: "Error al exportar PDF", description: err?.message || "No se pudo generar el reporte.", variant: "destructive" });
+        } finally {
+            setExporting(null);
+        }
+    };
+
+    // --- EXPORTAR A EXCEL ---
+    const handleExportarExcel = async () => {
+        setExporting('excel');
+        try {
+            // Resumen (KPIs)
+            const resumenSheet = {
+                name: "Resumen",
+                aoa: [
+                    ["RESUMEN DE PAGOS"],
+                    ["Período", periodoLabel],
+                    [],
+                    ["Indicador", "Valor"],
+                    ["Total Recaudado (C$)", fmtMoney(totalPagado)],
+                    ["Pendiente (C$)", fmtMoney(totalPendiente)],
+                    ["Registros", String(totalRegistros)],
+                    ["Deuda Total (C$)", fmtMoney(deudoresData.totalDeuda)],
+                    ["Familias con Deuda", String(deudoresData.totalFamilias)],
+                ] as (string | number)[][],
+                cols: [30, 24],
+            };
+
+            // Recaudación por mes
+            const recaudacion = buildRecaudacionPorMes();
+            const recaudacionSheet = {
+                name: "Recaudación por Mes",
+                aoa: [
+                    ["RECAUDACIÓN POR MES VENCIDO"],
+                    ["Mes", "Recaudado (C$)", "Esperado (C$)", "Pendiente (C$)", "% Cumpl."],
+                    ...recaudacion.rows.map((r) => [
+                        r.mes,
+                        fmtMoney(r.recaudado),
+                        fmtMoney(r.esperado),
+                        fmtMoney(r.pendiente),
+                        `${r.cumpl}%`,
+                    ]),
+                    [
+                        "TOTAL",
+                        fmtMoney(recaudacion.total.recaudado),
+                        fmtMoney(recaudacion.total.esperado),
+                        fmtMoney(recaudacion.total.pendiente),
+                        `${recaudacion.total.cumpl}%`,
+                    ],
+                ] as (string | number)[][],
+                cols: [16, 16, 16, 16, 12],
+            };
+
+            // Detalle por familia
+            const detalle = buildDetallePorFamilia();
+            const detalleSheet = {
+                name: "Detalle por Familia",
+                aoa: [
+                    ["DETALLE POR FAMILIA"],
+                    ["Familia / Tutor", "Pagado (C$)", "Pendiente (C$)", "Estado"],
+                    ...detalle.map((f) => [f.tutor, fmtMoney(f.pagado), fmtMoney(f.pendiente), f.estado]),
+                ] as (string | number)[][],
+                cols: [34, 16, 16, 12],
+            };
+
+            // Pagos (todas las transacciones ordenadas por fecha desc)
+            const pagosOrdenados = [...pagos].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+            const pagosSheet = {
+                name: "Pagos",
+                aoa: [
+                    ["TRANSACCIONES DE PAGOS"],
+                    ["Fecha", "Alumno", "Mes", "Monto", "Estado"],
+                    ...pagosOrdenados.map((p) => [
+                        p.fecha || "",
+                        p.alumnoNombre || "",
+                        p.mes || "",
+                        fmtMoney(Number(p.monto) || 0),
+                        p.estado,
+                    ]),
+                ] as (string | number)[][],
+                cols: [14, 30, 18, 14, 12],
+            };
+
+            // Cuaderno Anual (matriz)
+            const cuadernoHeader = ["Grado", "Alumno", "Mensualidad", ...MESES_ESCOLARES_BASE];
+            const cuadernoRows: (string | number)[][] = [];
+            for (const grado of cuadernoData.sortedGroupKeys) {
+                for (const alumno of cuadernoData.grouped[grado]) {
+                    const fila: (string | number)[] = [
+                        grado,
+                        alumno.nombre,
+                        `C$${fmtMoney(Number(alumno.precio) || 0)}`,
+                    ];
+                    for (const mesData of alumno.meses) {
+                        if (mesData.mes === MES_DICIEMBRE) {
+                            fila.push(mesData.totalAbonado > 0 ? `C$${fmtMoney(mesData.totalAbonado)}` : "-");
+                        } else {
+                            fila.push(mesData.fechaSimple || "-");
+                        }
+                    }
+                    cuadernoRows.push(fila);
+                }
+            }
+            const cuadernoSheet = {
+                name: "Cuaderno Anual",
+                aoa: [
+                    ["CUADERNO ANUAL DE PAGOS"],
+                    cuadernoHeader,
+                    ...cuadernoRows,
+                ] as (string | number)[][],
+                cols: [16, 26, 14, ...MESES_ESCOLARES_BASE.map(() => 12)],
+            };
+
+            // Deudores
+            const deudoresSheet = {
+                name: "Deudores",
+                aoa: [
+                    ["FAMILIAS CON DEUDA"],
+                    ["Familia", "Meses que adeuda", "Nº Alumnos", "Deuda (C$)"],
+                    ...deudoresData.lista.map((f) => [
+                        f.tutor,
+                        f.meses.join(", "),
+                        f.alumnos.length,
+                        fmtMoney(f.total),
+                    ]),
+                    ["TOTAL", "", deudoresData.totalAlumnosMorosos, fmtMoney(deudoresData.totalDeuda)],
+                ] as (string | number)[][],
+                cols: [30, 36, 12, 16],
+            };
+
+            exportExcel("Reporte_Pagos", [
+                resumenSheet,
+                recaudacionSheet,
+                detalleSheet,
+                pagosSheet,
+                cuadernoSheet,
+                deudoresSheet,
+            ]);
+
+            toast({ title: "Excel generado", description: "El reporte de pagos se descargó correctamente." });
+        } catch (err: any) {
+            toast({ title: "Error al exportar Excel", description: err?.message || "No se pudo generar el archivo.", variant: "destructive" });
+        } finally {
+            setExporting(null);
+        }
+    };
+
     if (loading) return (
         <DashboardLayout title="Gestión de Pagos" menuItems={menuItems}>
             <div className="flex justify-center items-center h-64"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
@@ -343,9 +718,9 @@ export default function PagosPage() {
 
     if (error && pagos.length === 0 && alumnos.length === 0) return (
         <DashboardLayout title="Gestión de Pagos" menuItems={menuItems}>
-            <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+            <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
                 <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-                <h3 className="text-xl font-bold text-red-700 mb-2">Error al cargar datos</h3>
+                <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar datos</h3>
                 <p className="text-muted-foreground max-w-md">{error}</p>
                 <Button className="mt-4" onClick={fetchDatos}>Intentar de nuevo</Button>
             </div>
@@ -402,15 +777,47 @@ export default function PagosPage() {
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowDeudores(true)}
+                            className="w-full sm:w-auto border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                        >
+                            <UserX className="h-4 w-4 mr-2" />
+                            Ver Deudores
+                            {deudoresData.totalFamilias > 0 && (
+                                <Badge className="ml-2 bg-red-600 text-white hover:bg-red-600 px-1.5">{deudoresData.totalFamilias}</Badge>
+                            )}
+                        </Button>
+
+                        <Button
+                            variant="outline"
                             onClick={() => setViewMode(viewMode === 'lista' ? 'cuaderno' : 'lista')}
                             className="w-full sm:w-auto"
                         >
                             {viewMode === 'lista' ? <LayoutGrid className="h-4 w-4 mr-2" /> : <List className="h-4 w-4 mr-2" />}
                             {viewMode === 'lista' ? 'Ver Resumen' : 'Ver Historial'}
                         </Button>
-                        
+
+                        <Button
+                            variant="outline"
+                            onClick={handleExportarExcel}
+                            disabled={exporting !== null}
+                            className="w-full sm:w-auto"
+                        >
+                            {exporting === 'excel' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}
+                            Excel
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            onClick={handleExportarPDF}
+                            disabled={exporting !== null}
+                            className="w-full sm:w-auto"
+                        >
+                            {exporting === 'pdf' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                            PDF
+                        </Button>
+
                         <Link href="/dashboard/propietario/pagos/nuevo" className="w-full sm:w-auto">
                             <Button className="w-full">
                                 <Plus className="h-4 w-4 mr-2" /> Registrar Pago
@@ -517,7 +924,7 @@ export default function PagosPage() {
                                                                                     size="icon" 
                                                                                     disabled={isDeleting}
                                                                                     onClick={() => handleDeleteGroup(data.ids, mes, grupo.tutor)}
-                                                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                                                                                     title="Eliminar pago familiar"
                                                                                 >
                                                                                     {isDeleting ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4" />}
@@ -603,6 +1010,81 @@ export default function PagosPage() {
                     )}
                 </Card>
             </div>
+
+            {/* --- DIÁLOGO: ¿QUIÉNES DEBEN? --- */}
+            <Dialog open={showDeudores} onOpenChange={setShowDeudores}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <UserX className="h-5 w-5 text-red-500" />
+                            Familias con pagos pendientes
+                        </DialogTitle>
+                        <DialogDescription>
+                            Deuda calculada solo sobre los meses ya vencidos del año {ANIO_ESCOLAR}
+                            {MESES_VENCIDOS_COUNT > 0 ? ` (hasta ${MESES_VENCIDOS_BASE[MESES_VENCIDOS_COUNT - 1]}).` : "."}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Resumen */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="rounded-lg border bg-red-50 dark:bg-red-500/10 dark:border-red-500/20 p-3 text-center">
+                            <div className="text-xl font-bold text-red-600 dark:text-red-400">C$ {deudoresData.totalDeuda.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">Deuda total</div>
+                        </div>
+                        <div className="rounded-lg border bg-orange-50 dark:bg-orange-500/10 dark:border-orange-500/20 p-3 text-center">
+                            <div className="text-xl font-bold text-orange-600 dark:text-orange-400">{deudoresData.totalFamilias}</div>
+                            <div className="text-xs text-muted-foreground">Familias</div>
+                        </div>
+                        <div className="rounded-lg border bg-muted/40 p-3 text-center">
+                            <div className="text-xl font-bold">{deudoresData.totalAlumnosMorosos}</div>
+                            <div className="text-xs text-muted-foreground">Alumnos</div>
+                        </div>
+                    </div>
+
+                    {deudoresData.lista.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                            <Check className="h-12 w-12 text-green-500 mb-3" />
+                            <p className="font-semibold">¡Todas las familias están al día!</p>
+                            <p className="text-sm text-muted-foreground">No hay saldos pendientes en los meses vencidos.</p>
+                        </div>
+                    ) : (
+                        <ScrollArea className="max-h-[55vh] pr-3">
+                            <div className="space-y-3">
+                                {deudoresData.lista.map((familia) => (
+                                    <div key={familia.tutor} className="rounded-lg border p-3">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <div className="font-semibold truncate">{familia.tutor}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {familia.alumnos.map(a => a.nombre).join(", ")}
+                                                </div>
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <div className="font-bold text-red-600 dark:text-red-400 whitespace-nowrap">
+                                                    C$ {familia.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">{familia.meses.length} mes(es)</div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 flex flex-wrap items-center gap-1">
+                                            <CalendarClock className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                                            {familia.meses.map(mes => (
+                                                <Badge
+                                                    key={mes}
+                                                    variant="outline"
+                                                    className="text-red-600 border-red-200 bg-red-50 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400 text-xs"
+                                                >
+                                                    {mes}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    )}
+                </DialogContent>
+            </Dialog>
         </DashboardLayout>
     )
 }

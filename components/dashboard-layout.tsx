@@ -151,11 +151,13 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Abrir menú"
                 className="group relative flex h-9 w-9 items-center justify-center rounded-xl
-                           bg-blue-50 dark:bg-blue-900/20 
-                           text-[#1b5680] dark:text-sky-300 
-                           transition-all hover:bg-blue-100 dark:hover:bg-blue-900/40 
-                           hover:scale-105 active:scale-95"
+                           bg-blue-50 dark:bg-blue-900/20
+                           text-[#1b5680] dark:text-sky-300
+                           transition-all hover:bg-blue-100 dark:hover:bg-blue-900/40
+                           hover:scale-105 active:scale-95
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b5680]/40 dark:focus-visible:ring-sky-400/50"
               >
                 <Menu className="h-4 w-4" />
               </button>
@@ -185,10 +187,12 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
               {/* Tema */}
               <button
                 onClick={toggleTheme}
-                className="flex h-9 w-9 items-center justify-center rounded-xl 
-                           text-[#1b5680]/70 dark:text-sky-300/70 
-                           hover:bg-muted dark:hover:bg-accent 
-                           transition-all hover:scale-105 active:scale-95"
+                className="flex h-9 w-9 items-center justify-center rounded-xl
+                           text-[#1b5680]/70 dark:text-sky-300/70
+                           hover:bg-muted dark:hover:bg-accent
+                           transition-all hover:scale-105 active:scale-95
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1b5680]/40 dark:focus-visible:ring-sky-400/50"
+                aria-label={isDarkMode ? "Activar modo claro" : "Activar modo oscuro"}
                 title={isDarkMode ? "Modo claro" : "Modo oscuro"}
               >
                 {isDarkMode 
@@ -213,11 +217,12 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                 {/* Botón Cerrar Sesión */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white 
-                             btn-primary-gradient 
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white
+                             btn-primary-gradient
                              hover:opacity-90
-                             shadow-md shadow-blue-900/20 
-                             transition-all hover:scale-105 active:scale-95"
+                             shadow-md shadow-blue-900/20
+                             transition-all hover:scale-105 active:scale-95
+                             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span className="hidden md:inline">Salir</span>
@@ -264,12 +269,13 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                   </div>
                   <div>
                     <p className="text-white font-bold text-sm leading-none">Recorrido</p>
-                    <p className="text-sky-300/80 text-[10px] mt-0.5">Sistema Escolar</p>
+                    <p className="text-slate-300/75 text-[10px] mt-0.5">Sistema Escolar</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  aria-label="Cerrar menú"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -282,8 +288,8 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                     {initials}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white text-sm font-semibold leading-none truncate">{user.name}</p>
-                    <p className="text-sky-300/80 text-[11px] mt-0.5">{user.role}</p>
+                    <p className="text-white text-sm font-semibold leading-none truncate" title={user.name}>{user.name}</p>
+                    <p className="text-slate-300/85 text-[11px] mt-0.5">{user.role}</p>
                   </div>
                   <div className="ml-auto shrink-0">
                     <span className="flex items-center gap-1">
@@ -296,7 +302,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
 
               {/* Lista de menú */}
               <div className="relative flex-1 overflow-y-auto py-3 px-3 space-y-1">
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest px-2 mb-2">Módulos</p>
+                <p className="text-[10px] font-bold text-sky-200/55 uppercase tracking-widest px-2 mb-2">Módulos</p>
                 {menuItems.map((item, index) => {
                   const Icon = item.icon;
                   const isActive = pathname.startsWith(item.href);
@@ -307,7 +313,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.04, duration: 0.25 }}
                     >
-                      <Link href={item.href} onClick={() => setSidebarOpen(false)}>
+                      <Link href={item.href} onClick={() => setSidebarOpen(false)} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50">
                         <div className={`
                           group relative flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200
                           ${isActive 
@@ -330,18 +336,18 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
 
                           {/* Texto */}
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium leading-none truncate ${isActive ? 'text-white' : 'text-sky-100 group-hover:text-white'}`}>
+                            <p className={`text-sm font-medium leading-none truncate ${isActive ? 'text-white' : 'text-slate-100 group-hover:text-white'}`}>
                               {item.title}
                             </p>
                             {item.description && (
-                              <p className="text-[10px] text-sky-400/70 group-hover:text-sky-300 mt-0.5 truncate transition-colors">
+                              <p className={`text-[11px] mt-0.5 truncate transition-colors ${isActive ? 'text-slate-200/90' : 'text-slate-300/80 group-hover:text-slate-100'}`}>
                                 {item.description}
                               </p>
                             )}
                           </div>
 
                           {/* Flecha */}
-                          <ChevronRight className={`h-3 w-3 shrink-0 transition-all duration-200 ${isActive ? 'text-white opacity-100' : 'text-sky-400 opacity-0 group-hover:opacity-100'}`} />
+                          <ChevronRight className={`h-3 w-3 shrink-0 transition-all duration-200 ${isActive ? 'text-white opacity-100' : 'text-slate-300 opacity-0 group-hover:opacity-100'}`} />
                         </div>
                       </Link>
                     </motion.div>
@@ -353,7 +359,7 @@ export function DashboardLayout({ children, title, menuItems }: DashboardLayoutP
               <div className="relative px-4 py-4 border-t border-white/10">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:text-white bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-400/30 transition-all duration-200"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:text-white bg-white/5 hover:bg-red-500/25 border border-white/10 hover:border-red-400/40 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
                 >
                   <LogOut className="h-4 w-4" />
                   Cerrar Sesión

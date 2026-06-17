@@ -149,9 +149,9 @@ export default function PagosTutorPage() {
   if (error && pagos.length === 0) {
     return (
       <TutorLayout title="Historial de Pagos">
-        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
           <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-          <h3 className="text-lg font-bold text-red-700 mb-2">Error al cargar datos</h3>
+          <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar datos</h3>
           <p className="text-muted-foreground max-w-md">{error}</p>
           <Button className="mt-4" onClick={() => window.location.reload()}>
             Intentar de nuevo
@@ -224,7 +224,7 @@ export default function PagosTutorPage() {
                                     <span>Meta: C$ {pago.montoEsperado}</span>
                                   </div>
                                   <Progress value={porcentaje} className="h-2" />
-                                  <p className="text-[10px] text-blue-600 mt-1 font-medium">
+                                  <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">
                                     Resta: C$ {(pago.montoEsperado - pago.montoPagado).toLocaleString()}
                                   </p>
                                 </div>
@@ -237,7 +237,7 @@ export default function PagosTutorPage() {
                               <Badge variant="default">Pagado</Badge>
                             ) : (
                               pago.esDiciembre ? (
-                                <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                                <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
                                   <PiggyBank className="w-3 h-3 mr-1" /> Abonando
                                 </Badge>
                               ) : (

@@ -234,7 +234,7 @@ export default function PersonalPage() {
 
                 {/* Tabla */}
                 {personal.length === 0 && !loading ? (
-                    <div className="text-center py-10 text-muted-foreground border rounded-md bg-gray-50">
+                    <div className="text-center py-10 text-muted-foreground border rounded-md bg-gray-50 dark:bg-slate-900">
                         No hay personal registrado con este filtro.
                     </div>
                 ) : (
