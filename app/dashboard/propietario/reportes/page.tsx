@@ -52,6 +52,43 @@ function roundedRect(doc: jsPDF, x: number, y: number, w: number, h: number, r: 
     doc.roundedRect(x, y, w, h, r, r, 'F');
 }
 
+/**
+ * Dibuja un autobús con primitivas vectoriales.
+ * Sustituye al emoji 🚌, que jsPDF renderiza como símbolos ilegibles ("Ø=ÞŒ").
+ */
+function drawBusIcon(doc: jsPDF, bx: number, by: number, size: number) {
+    // Recuadro de fondo
+    doc.setFillColor(50, 80, 150);
+    doc.roundedRect(bx, by, size, size, 3, 3, 'F');
+
+    const bodyX = bx + size * 0.16;
+    const bodyY = by + size * 0.3;
+    const bodyW = size * 0.68;
+    const bodyH = size * 0.34;
+
+    // Carrocería (blanca)
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(bodyX, bodyY, bodyW, bodyH, 1.4, 1.4, 'F');
+
+    // Franja de ventanas (color del fondo)
+    doc.setFillColor(50, 80, 150);
+    const winY = bodyY + bodyH * 0.16;
+    const winH = bodyH * 0.32;
+    const winW = bodyW * 0.19;
+    const gap = bodyW * 0.06;
+    let wx = bodyX + bodyW * 0.1;
+    for (let i = 0; i < 3; i++) {
+        doc.roundedRect(wx, winY, winW, winH, 0.5, 0.5, 'F');
+        wx += winW + gap;
+    }
+
+    // Ruedas
+    doc.setFillColor(25, 35, 70);
+    const wheelY = bodyY + bodyH + size * 0.02;
+    doc.circle(bodyX + bodyW * 0.26, wheelY, size * 0.075, 'F');
+    doc.circle(bodyX + bodyW * 0.74, wheelY, size * 0.075, 'F');
+}
+
 /** Cabecera del PDF */
 function drawPDFHeader(doc: jsPDF, fecha: string, periodo: string) {
     const pw = doc.internal.pageSize.getWidth();
@@ -62,14 +99,8 @@ function drawPDFHeader(doc: jsPDF, fecha: string, periodo: string) {
     doc.setFillColor(29, 66, 128);   // #1d4280
     doc.rect(pw * 0.55, 0, pw * 0.45, 42, 'F');
 
-    // Logo / ícono de bus (cuadrado redondeado)
-    doc.setFillColor(255, 255, 255, 0.15);
-    doc.setFillColor(50, 80, 150);
-    roundedRect(doc, 14, 8, 22, 22, 3);
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('🚌', 17, 23);
+    // Logo / ícono de bus (vectorial, sin emoji)
+    drawBusIcon(doc, 14, 8, 22);
 
     // Título principal
     doc.setFont('helvetica', 'bold');
@@ -430,17 +461,21 @@ function generarPDF(data: any, periodo: string) {
 
     y = drawSectionTitle(doc, 'Cartera de Morosidad', '¿Cuántos deben y en qué meses?', y, [239, 68, 68]);
 
+    const sinCobranza = (data.kpi?.alumnosFacturables ?? 0) === 0;
+    const hayMora = !!(data.deudaPorMes && data.deudaPorMes.some((d: any) => (d.deudores || 0) > 0));
+
     // KPIs de cobranza
     const kpiMW = (pw - 28 - 9) / 4;
     drawKPICard(doc, 14, y, kpiMW, 'Deuda Pendiente', `C$ ${(data.kpi?.deudaTotal || 0).toLocaleString()}`, 'Meses vencidos', [239, 68, 68]);
     drawKPICard(doc, 14 + kpiMW + 3, y, kpiMW, 'Familias que Deben', String(data.kpi?.familiasMorosas || 0), 'Con saldo pendiente', [245, 158, 11]);
     drawKPICard(doc, 14 + (kpiMW + 3) * 2, y, kpiMW, 'Alumnos con Deuda', String(data.kpi?.alumnosMorosos || 0), 'Mensualidad atrasada', [139, 92, 246]);
-    drawKPICard(doc, 14 + (kpiMW + 3) * 3, y, kpiMW, 'Tasa de Cobro', `${data.kpi?.tasaCobro ?? 100}%`, 'Recaudado vs esperado', [16, 185, 129]);
+    drawKPICard(doc, 14 + (kpiMW + 3) * 3, y, kpiMW, 'Tasa de Cobro', sinCobranza ? 'N/D' : `${data.kpi?.tasaCobro ?? 100}%`, 'Recaudado vs esperado', [16, 185, 129]);
     y += 38;
 
-    // Deuda por mes (cuántos deben en cada mes)
-    if (data.deudaPorMes && data.deudaPorMes.length > 0) {
-        const chartMora = data.deudaPorMes.map((d: any) => ({
+    if (hayMora) {
+        // Deuda por mes (solo los meses con deudores reales, sin filas en cero)
+        const mesesConMora = data.deudaPorMes.filter((d: any) => (d.deudores || 0) > 0);
+        const chartMora = mesesConMora.map((d: any) => ({
             label: d.mes,
             value: d.deudores || 0,
             color: '#ef4444',
@@ -451,13 +486,34 @@ function generarPDF(data: any, periodo: string) {
         y = drawSectionTitle(doc, 'Deuda por Mes', '', y, [239, 68, 68]);
         const hMes = ['Mes', 'Alumnos que deben', 'Monto adeudado (C$)'];
         const cMes = [50, 60, 72];
-        const rMes = data.deudaPorMes.map((d: any) => [
+        const rMes = mesesConMora.map((d: any) => [
             d.mes || '',
             String(d.deudores || 0),
             (d.monto || 0).toLocaleString(),
         ]);
         y = drawTable(doc, hMes, rMes, y, cMes, [239, 68, 68]);
         y += 10;
+    } else {
+        // Sin morosidad: explicamos el porqué en lugar de mostrar gráficas/tablas en cero
+        const titulo = sinCobranza ? 'Sin cobranza configurada' : 'Cartera al día';
+        const lineas = sinCobranza
+            ? ['No hay alumnos con mensualidad asignada (precio en C$ 0).',
+               'Asigna el precio mensual a cada alumno para activar el control de morosidad.']
+            : ['Todas las familias con mensualidad asignada están al día en los meses vencidos.',
+               'No hay saldos pendientes a la fecha de generación.'];
+        const color = sinCobranza ? [245, 158, 11] : [16, 185, 129];
+        doc.setFillColor(248, 250, 255);
+        doc.setDrawColor(color[0], color[1], color[2]);
+        doc.roundedRect(14, y, pw - 28, 24, 3, 3, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(color[0], color[1], color[2]);
+        doc.text(titulo, 20, y + 9);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(90, 105, 130);
+        lineas.forEach((l, i) => doc.text(l, 20, y + 15 + i * 5));
+        y += 32;
     }
 
     // Detalle de familias morosas
@@ -632,7 +688,8 @@ function generarExcel(data: any, periodo: string) {
             ['Deuda total pendiente (C$)', data.kpi?.deudaTotal || 0, ''],
             ['Familias que deben', data.kpi?.familiasMorosas || 0, ''],
             ['Alumnos con deuda', data.kpi?.alumnosMorosos || 0, ''],
-            ['Tasa de cobro (%)', `${data.kpi?.tasaCobro ?? 100}%`, ''],
+            ['Alumnos con mensualidad asignada', data.kpi?.alumnosFacturables ?? 0, ''],
+            ['Tasa de cobro (%)', (data.kpi?.alumnosFacturables ?? 0) === 0 ? 'N/D' : `${data.kpi?.tasaCobro ?? 100}%`, ''],
             [],
             ['Mes', 'Alumnos que deben', 'Monto adeudado (C$)'],
             ...data.deudaPorMes.map((d: any) => [d.mes || '', d.deudores || 0, d.monto || 0]),
@@ -1039,9 +1096,11 @@ export default function ReportesPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                            {data.kpi?.tasaCobro ?? 100}%
+                                            {(data.kpi?.alumnosFacturables ?? 0) === 0 ? "—" : `${data.kpi?.tasaCobro ?? 100}%`}
                                         </div>
-                                        <p className="text-xs text-muted-foreground mt-1">Recaudado vs. esperado</p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {(data.kpi?.alumnosFacturables ?? 0) === 0 ? "Sin mensualidad asignada" : "Recaudado vs. esperado"}
+                                        </p>
                                     </CardContent>
                                 </Card>
                                 <Card>
@@ -1067,9 +1126,9 @@ export default function ReportesPage() {
                                     <CardDescription>Alumnos con saldo pendiente y monto adeudado por mes vencido</CardDescription>
                                 </CardHeader>
                                 <CardContent className="h-[400px] w-full">
-                                    {(data.deudaPorMes && data.deudaPorMes.length > 0) ? (
+                                    {(data.deudaPorMes && data.deudaPorMes.some((d: any) => (d.deudores || 0) > 0)) ? (
                                         <ResponsiveContainer width="100%" height="100%">
-                                            <ComposedChart data={data.deudaPorMes}>
+                                            <ComposedChart data={data.deudaPorMes.filter((d: any) => (d.deudores || 0) > 0)}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartTheme.gridColor} />
                                                 <XAxis dataKey="mes" stroke={chartTheme.textColor} fontSize={12} />
                                                 <YAxis yAxisId="left" stroke={chartTheme.textColor} fontSize={12} allowDecimals={false} />
@@ -1081,11 +1140,19 @@ export default function ReportesPage() {
                                             </ComposedChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                                            <Check className="w-12 h-12 text-green-500 mb-3" />
-                                            <p className="font-medium">¡Nadie debe!</p>
-                                            <p className="text-sm">No hay saldos pendientes en los meses vencidos.</p>
-                                        </div>
+                                        (data.kpi?.alumnosFacturables ?? 0) === 0 ? (
+                                            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                                                <AlertTriangle className="w-12 h-12 text-amber-500 mb-3" />
+                                                <p className="font-medium">Sin mensualidad configurada</p>
+                                                <p className="text-sm max-w-sm">Ningún alumno activo tiene precio asignado (C$ 0). Asigna la mensualidad de cada alumno para activar el control de morosidad.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                                                <Check className="w-12 h-12 text-green-500 mb-3" />
+                                                <p className="font-medium">¡Nadie debe!</p>
+                                                <p className="text-sm">No hay saldos pendientes en los meses vencidos.</p>
+                                            </div>
+                                        )
                                     )}
                                 </CardContent>
                             </Card>

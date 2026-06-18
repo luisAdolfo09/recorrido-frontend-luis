@@ -112,6 +112,46 @@ export class ReportPDF {
         this.doc.roundedRect(x, y, w, h, r, r, "F");
     }
 
+    /**
+     * Dibuja un autobús estilizado con primitivas vectoriales.
+     * Reemplaza al emoji 🚌, que jsPDF (fuente Helvetica) renderiza como
+     * caracteres ilegibles ("Ø=ÞŒ").
+     */
+    private drawBusIcon(bx: number, by: number, size: number) {
+        const doc = this.doc;
+
+        // Recuadro de fondo
+        doc.setFillColor(50, 80, 150);
+        doc.roundedRect(bx, by, size, size, 3, 3, "F");
+
+        const bodyX = bx + size * 0.16;
+        const bodyY = by + size * 0.3;
+        const bodyW = size * 0.68;
+        const bodyH = size * 0.34;
+
+        // Carrocería (blanca)
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(bodyX, bodyY, bodyW, bodyH, 1.4, 1.4, "F");
+
+        // Franja de ventanas (color del fondo)
+        doc.setFillColor(50, 80, 150);
+        const winY = bodyY + bodyH * 0.16;
+        const winH = bodyH * 0.32;
+        const winW = bodyW * 0.19;
+        const gap = bodyW * 0.06;
+        let wx = bodyX + bodyW * 0.1;
+        for (let i = 0; i < 3; i++) {
+            doc.roundedRect(wx, winY, winW, winH, 0.5, 0.5, "F");
+            wx += winW + gap;
+        }
+
+        // Ruedas
+        doc.setFillColor(25, 35, 70);
+        const wheelY = bodyY + bodyH + size * 0.02;
+        doc.circle(bodyX + bodyW * 0.26, wheelY, size * 0.075, "F");
+        doc.circle(bodyX + bodyW * 0.74, wheelY, size * 0.075, "F");
+    }
+
     private drawHeader() {
         const { doc, pw } = this;
         const accent = this.meta.accent || REPORT_COLORS.navy;
@@ -122,13 +162,8 @@ export class ReportPDF {
         doc.setFillColor(accent[0], accent[1], accent[2]);
         doc.rect(pw * 0.55, 0, pw * 0.45, 42, "F");
 
-        // Logo / icono
-        doc.setFillColor(50, 80, 150);
-        this.rect(MARGIN, 8, 22, 22, 3);
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("🚌", 17, 23);
+        // Logo / icono (autobús vectorial, sin emoji)
+        this.drawBusIcon(MARGIN, 8, 22);
 
         // Título
         doc.setFont("helvetica", "bold");
