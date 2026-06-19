@@ -749,13 +749,13 @@ export default function PagosPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <Card className="flex flex-col justify-between">
                         <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Pagado</CardDescription></CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-green-600">C${totalPagado.toLocaleString()}</div></CardContent>
+                        <CardContent><div className="text-2xl font-bold text-green-600">C${formatCurrency(totalPagado)}</div></CardContent>
                     </Card>
                     <Card className="flex flex-col justify-between">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-sm font-medium">{cardMonthFilter === "Todos" ? "Total Pendiente (Anual)" : `Pendiente (${cardMonthFilter.split(" ")[0]})`}</CardDescription> 
                         </CardHeader>
-                        <CardContent><div className="text-2xl font-bold text-orange-600">C${totalPendiente.toLocaleString()}</div></CardContent>
+                        <CardContent><div className="text-2xl font-bold text-orange-600">C${formatCurrency(totalPendiente)}</div></CardContent>
                     </Card>
                     <Card className="flex flex-col justify-between sm:col-span-2 md:col-span-1">
                         <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Registros</CardDescription></CardHeader>
@@ -1028,7 +1028,7 @@ export default function PagosPage() {
                     {/* Resumen */}
                     <div className="grid grid-cols-3 gap-3">
                         <div className="rounded-lg border bg-red-50 dark:bg-red-500/10 dark:border-red-500/20 p-3 text-center">
-                            <div className="text-xl font-bold text-red-600 dark:text-red-400">C$ {deudoresData.totalDeuda.toLocaleString()}</div>
+                            <div className="text-xl font-bold text-red-600 dark:text-red-400">C$ {formatCurrency(deudoresData.totalDeuda)}</div>
                             <div className="text-xs text-muted-foreground">Deuda total</div>
                         </div>
                         <div className="rounded-lg border bg-orange-50 dark:bg-orange-500/10 dark:border-orange-500/20 p-3 text-center">

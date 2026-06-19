@@ -179,10 +179,12 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
         
         const base = Math.floor(nuevoTotal / count);
         const resto = nuevoTotal % count;
-        
+
         const nuevosHijos = hijos.map((h, i) => ({
             ...h,
-            precio: base + (i === 0 ? resto : 0)
+            // Redondeamos a 2 decimales para no arrastrar ruido de punto flotante
+            // (ej. 1000.7 % 3 = 1.6999999…) al precio que se muestra y se persiste.
+            precio: i === 0 ? Number((base + resto).toFixed(2)) : base
         }));
         setHijos(nuevosHijos);
     };
@@ -402,7 +404,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                                 <div className="space-y-2 flex-1">
                                                     <Label className="text-xs text-muted-foreground">Cuota</Label>
                                                     <div className="h-10 flex items-center px-3 bg-muted rounded-md border text-sm text-muted-foreground">
-                                                        C$ {hijo.precio}
+                                                        C$ {Number(hijo.precio || 0).toFixed(2)}
                                                     </div>
                                                 </div>
                                                 <Button 

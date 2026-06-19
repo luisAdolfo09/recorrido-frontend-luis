@@ -554,7 +554,7 @@ export default function GastosPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-xl md:text-2xl font-bold text-red-600">C${totalGastado.toLocaleString()}</div>
+                            <div className="text-xl md:text-2xl font-bold text-red-600">C${formatCurrency(totalGastado)}</div>
                         </CardContent>
                     </Card>
                     
@@ -563,7 +563,7 @@ export default function GastosPage() {
                             <CardDescription className="text-xs">Gasto de este Mes</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-xl md:text-2xl font-bold text-orange-600">C${gastoDelMes.toLocaleString()}</div>
+                            <div className="text-xl md:text-2xl font-bold text-orange-600">C${formatCurrency(gastoDelMes)}</div>
                         </CardContent>
                     </Card>
                     
@@ -573,7 +573,7 @@ export default function GastosPage() {
                             <CardDescription className="text-xs">{gastoCategoriaTitle}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-xl md:text-2xl font-bold text-blue-600">C${gastoPorCategoria.toLocaleString()}</div>
+                            <div className="text-xl md:text-2xl font-bold text-blue-600">C${formatCurrency(gastoPorCategoria)}</div>
                         </CardContent>
                     </Card>
 
@@ -583,7 +583,7 @@ export default function GastosPage() {
                             <CardDescription className="text-xs">{gastoVehiculoTitle}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-xl md:text-2xl font-bold text-purple-600">C${gastoPorVehiculo.toLocaleString()}</div>
+                            <div className="text-xl md:text-2xl font-bold text-purple-600">C${formatCurrency(gastoPorVehiculo)}</div>
                         </CardContent>
                     </Card>
                 </div>

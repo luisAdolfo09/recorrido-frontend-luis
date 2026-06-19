@@ -596,7 +596,7 @@ export default function PropietarioDashboard() {
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">C$ {stats.pagosMesTotal.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">C$ {Number(stats.pagosMesTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     <p className="text-xs text-muted-foreground mt-1">Recaudado este mes</p>
                 </CardContent>
             </Card>

@@ -350,7 +350,7 @@ export default function PagosRapidosPage() {
             }
 
             fetchData();
-            toast({ title: "Abono Registrado", description: `Se distribuyeron C$ ${abonoTotal} entre los hermanos.` });
+            toast({ title: "Abono Registrado", description: `Se distribuyeron C$ ${formatCurrency(abonoTotal)} entre los hermanos.` });
             
             // Limpiar el campo y errores
             const newAbonos = new Map(abonosDiciembre);

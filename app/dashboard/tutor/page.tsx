@@ -203,7 +203,7 @@ export default function TutorDashboard() {
             <CardContent>
               <div className="flex justify-between items-center mt-2">
                 <div>
-                  <p className="text-2xl font-bold">C$ {data.pagos?.montoPendiente || 0}</p>
+                  <p className="text-2xl font-bold">C$ {Number(data.pagos?.montoPendiente || 0).toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-muted-foreground">Saldo pendiente</p>
                 </div>
                 {data.pagos?.estado === 'al_dia' ? (

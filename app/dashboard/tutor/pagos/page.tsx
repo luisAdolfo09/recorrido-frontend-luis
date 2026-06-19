@@ -221,11 +221,11 @@ export default function PagosTutorPage() {
                                 <div className="w-32">
                                   <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                                     <span>Abonado</span>
-                                    <span>Meta: C$ {pago.montoEsperado}</span>
+                                    <span>Meta: C$ {pago.montoEsperado.toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                   </div>
                                   <Progress value={porcentaje} className="h-2" />
                                   <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">
-                                    Resta: C$ {(pago.montoEsperado - pago.montoPagado).toLocaleString()}
+                                    Resta: C$ {(pago.montoEsperado - pago.montoPagado).toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                   </p>
                                 </div>
                               )}

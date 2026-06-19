@@ -43,6 +43,9 @@ const menuItems: MenuItem[] = [
 // Colores para gráficas
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+// Formato de moneda C$ con 2 decimales fijos (evita decimales largos/inconsistentes)
+const fmtC = (n: number) => (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 // ─────────────────────────────────────────────────────────────────
 //  HELPERS PDF
 // ─────────────────────────────────────────────────────────────────
@@ -318,9 +321,9 @@ function generarPDF(data: any, periodo: string) {
     y = drawSectionTitle(doc, 'Resumen Ejecutivo', 'Indicadores clave del período', y, [29, 66, 128]);
 
     const kpiW = (pw - 28 - 9) / 4;
-    drawKPICard(doc, 14,           y, kpiW, 'Ingresos Totales',  `C$ ${(data.kpi.ingresosTotales || 0).toLocaleString()}`, 'Histórico acumulado', [16, 185, 129]);
-    drawKPICard(doc, 14 + kpiW + 3, y, kpiW, 'Gastos Totales',    `C$ ${(data.kpi.gastosTotales || 0).toLocaleString()}`,  'Operativos y mantenim.', [239, 68, 68]);
-    drawKPICard(doc, 14 + (kpiW + 3) * 2, y, kpiW, 'Utilidad Neta', `C$ ${(data.kpi.beneficioNeto || 0).toLocaleString()}`, 'Ingresos − Gastos', [99, 102, 241]);
+    drawKPICard(doc, 14,           y, kpiW, 'Ingresos Totales',  `C$ ${fmtC(data.kpi.ingresosTotales)}`, 'Histórico acumulado', [16, 185, 129]);
+    drawKPICard(doc, 14 + kpiW + 3, y, kpiW, 'Gastos Totales',    `C$ ${fmtC(data.kpi.gastosTotales)}`,  'Operativos y mantenim.', [239, 68, 68]);
+    drawKPICard(doc, 14 + (kpiW + 3) * 2, y, kpiW, 'Utilidad Neta', `C$ ${fmtC(data.kpi.beneficioNeto)}`, 'Ingresos − Gastos', [99, 102, 241]);
     drawKPICard(doc, 14 + (kpiW + 3) * 3, y, kpiW, 'Alumnos Activos', String(data.kpi.alumnosActivos || 0), 'Matrícula actual', [59, 130, 246]);
 
     y += 38;
@@ -359,9 +362,9 @@ function generarPDF(data: any, periodo: string) {
         const colWidths = [40, 50, 50, 42];
         const rows = data.finanzasPorMes.map((d: any) => [
             d.mes || '',
-            (d.ingreso || 0).toLocaleString(),
-            (d.gasto || 0).toLocaleString(),
-            ((d.ingreso || 0) - (d.gasto || 0)).toLocaleString(),
+            fmtC(d.ingreso),
+            fmtC(d.gasto),
+            fmtC((d.ingreso || 0) - (d.gasto || 0)),
         ]);
         y = drawTable(doc, headers, rows, y, colWidths, [29, 66, 128]);
         y += 10;
@@ -391,9 +394,9 @@ function generarPDF(data: any, periodo: string) {
         const cveh = [50, 56, 52, 24];
         const rveh = data.finanzasPorVehiculo.map((d: any) => [
             d.nombre || 'Sin nombre',
-            (d.ingresos || 0).toLocaleString(),
-            (d.gastos || 0).toLocaleString(),
-            ((d.ingresos || 0) - (d.gastos || 0)).toLocaleString(),
+            fmtC(d.ingresos),
+            fmtC(d.gastos),
+            fmtC((d.ingresos || 0) - (d.gastos || 0)),
         ]);
         y = drawTable(doc, hveh, rveh, y, cveh, [245, 158, 11]);
         y += 12;
@@ -489,7 +492,7 @@ function generarPDF(data: any, periodo: string) {
         const rMes = mesesConMora.map((d: any) => [
             d.mes || '',
             String(d.deudores || 0),
-            (d.monto || 0).toLocaleString(),
+            fmtC(d.monto),
         ]);
         y = drawTable(doc, hMes, rMes, y, cMes, [239, 68, 68]);
         y += 10;
@@ -528,7 +531,7 @@ function generarPDF(data: any, periodo: string) {
             m.familia || 'Sin Tutor',
             (m.meses || []).join(', '),
             String((m.alumnos || []).length),
-            (m.monto || 0).toLocaleString(),
+            fmtC(m.monto),
         ]);
         y = drawTable(doc, hMor, rMor, y, cMor, [239, 68, 68]);
         y += 10;
@@ -867,8 +870,7 @@ export default function ReportesPage() {
                         <div key={i} className="flex items-center gap-2">
                             <div style={{ width: 8, height: 8, backgroundColor: p.color, borderRadius: '50%' }} />
                             <span className="capitalize">
-                                {p.name}: {['ingreso', 'gasto', 'monto', 'ingresos', 'gastos'].some(k => p.dataKey?.toLowerCase().includes(k) || p.name?.toLowerCase().includes(k)) ? 'C$ ' : ''}
-                                {Number(p.value).toLocaleString()}
+                                {p.name}: {['ingreso', 'gasto', 'monto', 'ingresos', 'gastos'].some(k => p.dataKey?.toLowerCase().includes(k) || p.name?.toLowerCase().includes(k)) ? `C$ ${fmtC(p.value)}` : Number(p.value).toLocaleString()}
                             </span>
                         </div>
                     ))}
@@ -965,7 +967,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                    C$ {(data.kpi?.ingresosTotales || 0).toLocaleString()}
+                                    C$ {fmtC(data.kpi?.ingresosTotales)}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Histórico acumulado</p>
                             </CardContent>
@@ -977,7 +979,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                                    C$ {(data.kpi?.gastosTotales || 0).toLocaleString()}
+                                    C$ {fmtC(data.kpi?.gastosTotales)}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Operativos y Mantenimiento</p>
                             </CardContent>
@@ -989,7 +991,7 @@ export default function ReportesPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    C$ {(data.kpi?.beneficioNeto || 0).toLocaleString()}
+                                    C$ {fmtC(data.kpi?.beneficioNeto)}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">Ingresos - Gastos</p>
                             </CardContent>
@@ -1072,7 +1074,7 @@ export default function ReportesPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                                            C$ {(data.kpi?.deudaTotal || 0).toLocaleString()}
+                                            C$ {fmtC(data.kpi?.deudaTotal)}
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-1">Meses ya vencidos</p>
                                     </CardContent>
@@ -1190,7 +1192,7 @@ export default function ReportesPage() {
                                                                 </div>
                                                             </td>
                                                             <td className="py-2 pr-4 text-right font-bold text-red-600 dark:text-red-400 whitespace-nowrap">
-                                                                C$ {(m.monto || 0).toLocaleString()}
+                                                                C$ {fmtC(m.monto)}
                                                             </td>
                                                         </tr>
                                                     ))}
