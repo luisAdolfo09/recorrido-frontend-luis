@@ -195,7 +195,7 @@ export default function TutorDashboard() {
 
         {/* --- TARJETA DE PAGOS --- */}
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="md:col-span-1 hover:shadow-md transition-shadow">
+          <Card className="md:col-span-1 hover:shadow-md transition-shadow card-accent card-rise">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Estado de Cuenta</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />

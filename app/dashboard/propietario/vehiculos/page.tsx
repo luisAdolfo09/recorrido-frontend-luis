@@ -212,7 +212,7 @@ export default function VehiculosPage() {
 
                 {/* --- TARJETAS (ESTILO ORIGINAL) --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">
                                 Total Vehículos ({estadoFilter === 'activo' ? 'Activos' : 'En Mantenimiento'})
@@ -222,7 +222,7 @@ export default function VehiculosPage() {
                             <div className="text-xl md:text-2xl font-bold">{totalVehiculos}</div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Capacidad Total (Asientos)</CardDescription>
                         </CardHeader>

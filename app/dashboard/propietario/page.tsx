@@ -357,7 +357,7 @@ export default function PropietarioDashboard() {
             {/* 1. Suspensión */}
             <Dialog open={isEmergencyOpen} onOpenChange={setIsEmergencyOpen}>
                 <DialogTrigger asChild>
-                    <Card onClick={openEmergencyModal} className="border-l-8 border-l-red-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card onClick={openEmergencyModal} className="card-interactive border-l-8 border-l-red-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-red-600 uppercase flex justify-between">
                                 Emergencia <AlertTriangle className="h-5 w-5 group-hover:scale-110 transition-transform"/>
@@ -417,7 +417,7 @@ export default function PropietarioDashboard() {
             {/* 2. Configuración (RANGOS VALIDADOS) */}
             <Dialog open={isConfigOpen} onOpenChange={(open) => { setIsConfigOpen(open); if (open) fetchConfig(); }}>
                 <DialogTrigger asChild>
-                    <Card className="border-l-8 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card className="card-interactive border-l-8 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-blue-600 uppercase flex justify-between">
                                 Administración <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform"/>
@@ -495,7 +495,7 @@ export default function PropietarioDashboard() {
             {/* 3. MANTENIMIENTO ANUAL (Ámbar) - BOTONES ARREGLADOS */}
             <Dialog open={isPromoteOpen} onOpenChange={(open) => { setIsPromoteOpen(open); setIsPromoteConfirming(false); }}>
                 <DialogTrigger asChild>
-                    <Card className="border-l-8 border-l-amber-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card className="card-interactive border-l-8 border-l-amber-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-amber-600 uppercase flex justify-between">
                                 Fin de Año <GraduationCap className="h-6 w-6 group-hover:scale-110 transition-transform"/>
@@ -580,7 +580,7 @@ export default function PropietarioDashboard() {
         {/* RESUMEN OPERATIVO */}
         <h3 className="text-lg font-semibold text-muted-foreground pt-4">Resumen Operativo</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Alumnos Activos</CardDescription>
                     <Users className="h-4 w-4 text-muted-foreground" />
@@ -590,7 +590,7 @@ export default function PropietarioDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">Total registrados</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Pagos ({stats.mesActual})</CardDescription>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -600,7 +600,7 @@ export default function PropietarioDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">Recaudado este mes</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Personal</CardDescription>
                     <UserCog className="h-4 w-4 text-muted-foreground" />
@@ -610,7 +610,7 @@ export default function PropietarioDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">Choferes y Asistentes</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Vehículos</CardDescription>
                     <Bus className="h-4 w-4 text-muted-foreground" />

@@ -369,7 +369,7 @@ export default function AlumnosPage() {
         {/* --- TARJETAS DE RESUMEN --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Tarjeta 1: Total Alumnos */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">
                 Total Alumnos ({estadoFilter === 'activo' ? 'Activos' : 'Inactivos'})
@@ -381,7 +381,7 @@ export default function AlumnosPage() {
           </Card>
 
           {/* Tarjeta 2: Capacidad */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">{cardInfo.descripcionCapacidad}</CardDescription>
             </CardHeader>
@@ -391,7 +391,7 @@ export default function AlumnosPage() {
           </Card>
 
           {/* Tarjeta 3: Ingresos Mensuales Estimados (NUEVA) */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">
                 Ingreso Mensual Estimado

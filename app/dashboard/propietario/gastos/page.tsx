@@ -547,7 +547,7 @@ export default function GastosPage() {
 
                 {/* --- TARJETAS (AHORA 4 COLUMNAS) --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="border-l-4 border-l-red-600">
+                    <Card className="border-l-4 border-l-red-600 card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">
                                 Gasto Total ({estadoFilter === 'activo' ? 'Activos' : 'Inactivos'})
@@ -558,7 +558,7 @@ export default function GastosPage() {
                         </CardContent>
                     </Card>
                     
-                    <Card className="border-l-4 border-l-orange-500">
+                    <Card className="border-l-4 border-l-orange-500 card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Gasto de este Mes</CardDescription>
                         </CardHeader>
@@ -568,7 +568,7 @@ export default function GastosPage() {
                     </Card>
                     
                     {/* --- TARJETA DINÁMICA DE GASTO POR CATEGORÍA --- */}
-                    <Card className="border-l-4 border-l-blue-600">
+                    <Card className="border-l-4 border-l-blue-600 card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">{gastoCategoriaTitle}</CardDescription>
                         </CardHeader>
@@ -578,7 +578,7 @@ export default function GastosPage() {
                     </Card>
 
                     {/* --- TARJETA DINÁMICA DE GASTO POR VEHÍCULO --- */}
-                    <Card className="border-l-4 border-l-purple-600">
+                    <Card className="border-l-4 border-l-purple-600 card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">{gastoVehiculoTitle}</CardDescription>
                         </CardHeader>

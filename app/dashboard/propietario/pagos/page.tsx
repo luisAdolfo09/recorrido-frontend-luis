@@ -747,17 +747,17 @@ export default function PagosPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Card className="flex flex-col justify-between">
+                    <Card className="flex flex-col justify-between card-accent card-rise">
                         <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Pagado</CardDescription></CardHeader>
                         <CardContent><div className="text-2xl font-bold text-green-600">C${formatCurrency(totalPagado)}</div></CardContent>
                     </Card>
-                    <Card className="flex flex-col justify-between">
+                    <Card className="flex flex-col justify-between card-accent card-rise">
                         <CardHeader className="pb-2">
-                            <CardDescription className="text-sm font-medium">{cardMonthFilter === "Todos" ? "Total Pendiente (Anual)" : `Pendiente (${cardMonthFilter.split(" ")[0]})`}</CardDescription> 
+                            <CardDescription className="text-sm font-medium">{cardMonthFilter === "Todos" ? "Total Pendiente (Anual)" : `Pendiente (${cardMonthFilter.split(" ")[0]})`}</CardDescription>
                         </CardHeader>
                         <CardContent><div className="text-2xl font-bold text-orange-600">C${formatCurrency(totalPendiente)}</div></CardContent>
                     </Card>
-                    <Card className="flex flex-col justify-between sm:col-span-2 md:col-span-1">
+                    <Card className="flex flex-col justify-between sm:col-span-2 md:col-span-1 card-accent card-rise">
                         <CardHeader className="pb-2"><CardDescription className="text-sm font-medium">Total Registros</CardDescription></CardHeader>
                         <CardContent><div className="text-2xl font-bold">{totalRegistros}</div></CardContent>
                     </Card>

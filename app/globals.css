@@ -247,3 +247,62 @@
   outline: 2px solid #1b5680;
   outline-offset: 2px;
 }
+
+/* =====================================================
+   TARJETAS DINÁMICAS (rediseño profesional)
+   Clases reutilizables aplicadas en todo el proyecto.
+   ===================================================== */
+
+/* Tarjeta clicable: se eleva y resalta al pasar el cursor */
+.card-interactive {
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.22, .61, .36, 1), box-shadow .2s ease, border-color .2s ease;
+}
+.card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -12px rgba(21, 19, 85, 0.28);
+  border-color: rgba(27, 86, 128, 0.45);
+}
+.card-interactive:active { transform: translateY(-1px); }
+.dark .card-interactive:hover {
+  box-shadow: 0 16px 34px -12px rgba(0, 0, 0, 0.55);
+  border-color: rgba(125, 196, 255, 0.40);
+}
+
+/* Barra de acento superior (tarjetas KPI / resumen) */
+.card-accent {
+  position: relative;
+  overflow: hidden;
+}
+.card-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1b5680, #1d4280, #3b82f6);
+}
+
+/* Entrada suave: aparecer y subir (úsese con style animation-delay para escalonar) */
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-rise { animation: card-rise .5s cubic-bezier(.22, .61, .36, 1) both; }
+
+/* Insignia de icono con gradiente de marca */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.7rem;
+  background: linear-gradient(135deg, #1b5680, #1d4280);
+  color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(27, 86, 128, 0.55);
+}
+
+/* Realce sutil al pasar el cursor (para contenedores que no son Card) */
+.hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px -10px rgba(21, 19, 85, 0.25);
+}

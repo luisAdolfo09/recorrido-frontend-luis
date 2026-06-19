@@ -137,7 +137,7 @@ export default function AsistenteDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         
-        <Card className="overflow-hidden col-span-1 md:col-span-2 lg:col-span-1">
+        <Card className="overflow-hidden col-span-1 md:col-span-2 lg:col-span-1 card-accent card-rise">
             <div className="flex h-full">
                 <div className="p-6 flex-1 flex flex-col justify-center">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -166,15 +166,15 @@ export default function AsistenteDashboard() {
             </div>
         </Card>
 
-        <Card>
+        <Card className="card-accent card-rise">
             <CardHeader className="pb-2 flex flex-row items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /><CardDescription>Total Alumnos</CardDescription></CardHeader>
             <CardContent><div className="text-2xl font-bold">{resumen.stats.totalAlumnos}</div><p className="text-xs text-muted-foreground mt-1">En esta ruta</p></CardContent>
         </Card>
-        <Card>
+        <Card className="card-accent card-rise">
             <CardHeader className="pb-2 flex flex-row items-center gap-2"><UserCheck className="h-4 w-4 text-muted-foreground" /><CardDescription>Presentes Hoy</CardDescription></CardHeader>
             <CardContent><div className="text-2xl font-bold text-green-600 dark:text-green-400">{resumen.stats.presentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Alumnos a bordo</p></CardContent>
         </Card>
-        <Card>
+        <Card className="card-accent card-rise">
             <CardHeader className="pb-2 flex flex-row items-center gap-2"><UserX className="h-4 w-4 text-muted-foreground" /><CardDescription>Ausentes Hoy</CardDescription></CardHeader>
             <CardContent><div className="text-2xl font-bold text-red-600 dark:text-red-400">{resumen.stats.ausentesHoy}</div><p className="text-xs text-muted-foreground mt-1">Marcados ausentes</p></CardContent>
         </Card>

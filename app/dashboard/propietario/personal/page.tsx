@@ -184,7 +184,7 @@ export default function PersonalPage() {
 
                 {/* Resumen */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Total Personal ({estadoFilter})</CardDescription>
                         </CardHeader>
@@ -192,7 +192,7 @@ export default function PersonalPage() {
                             <div className="text-xl md:text-2xl font-bold">{totalPersonal}</div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Total Salarios (Mensual)</CardDescription>
                         </CardHeader>

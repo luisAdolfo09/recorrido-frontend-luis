@@ -960,7 +960,7 @@ export default function ReportesPage() {
                 {/* ---- KPI CARDS ---- */}
                 <div id="reporte-content" className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Card>
+                        <Card className="card-accent card-rise">
                             <CardHeader className="pb-2 flex-row items-center justify-between">
                                 <CardDescription>Ingresos Totales</CardDescription>
                                 <DollarSign className="w-4 h-4 text-green-500" />
@@ -972,7 +972,7 @@ export default function ReportesPage() {
                                 <p className="text-xs text-muted-foreground mt-1">Histórico acumulado</p>
                             </CardContent>
                         </Card>
-                        <Card>
+                        <Card className="card-accent card-rise">
                             <CardHeader className="pb-2 flex-row items-center justify-between">
                                 <CardDescription>Gastos Totales</CardDescription>
                                 <TrendingDown className="w-4 h-4 text-pink-500" />
@@ -984,7 +984,7 @@ export default function ReportesPage() {
                                 <p className="text-xs text-muted-foreground mt-1">Operativos y Mantenimiento</p>
                             </CardContent>
                         </Card>
-                        <Card>
+                        <Card className="card-accent card-rise">
                             <CardHeader className="pb-2 flex-row items-center justify-between">
                                 <CardDescription>Utilidad Neta</CardDescription>
                                 <Wallet className="w-4 h-4 text-indigo-500" />
@@ -996,7 +996,7 @@ export default function ReportesPage() {
                                 <p className="text-xs text-muted-foreground mt-1">Ingresos - Gastos</p>
                             </CardContent>
                         </Card>
-                        <Card>
+                        <Card className="card-accent card-rise">
                             <CardHeader className="pb-2 flex-row items-center justify-between">
                                 <CardDescription>Alumnos Activos</CardDescription>
                                 <Users className="w-4 h-4 text-blue-500" />
@@ -1067,7 +1067,7 @@ export default function ReportesPage() {
                         <TabsContent value="morosidad" className="space-y-4">
                             {/* KPIs de cobranza */}
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <Card>
+                                <Card className="card-accent card-rise">
                                     <CardHeader className="pb-2 flex-row items-center justify-between">
                                         <CardDescription>Deuda Pendiente</CardDescription>
                                         <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -1079,7 +1079,7 @@ export default function ReportesPage() {
                                         <p className="text-xs text-muted-foreground mt-1">Meses ya vencidos</p>
                                     </CardContent>
                                 </Card>
-                                <Card>
+                                <Card className="card-accent card-rise">
                                     <CardHeader className="pb-2 flex-row items-center justify-between">
                                         <CardDescription>Familias que Deben</CardDescription>
                                         <UserX className="w-4 h-4 text-orange-500" />
@@ -1091,7 +1091,7 @@ export default function ReportesPage() {
                                         <p className="text-xs text-muted-foreground mt-1">{data.kpi?.alumnosMorosos || 0} alumnos con atraso</p>
                                     </CardContent>
                                 </Card>
-                                <Card>
+                                <Card className="card-accent card-rise">
                                     <CardHeader className="pb-2 flex-row items-center justify-between">
                                         <CardDescription>Tasa de Cobro</CardDescription>
                                         <Percent className="w-4 h-4 text-green-500" />
@@ -1105,7 +1105,7 @@ export default function ReportesPage() {
                                         </p>
                                     </CardContent>
                                 </Card>
-                                <Card>
+                                <Card className="card-accent card-rise">
                                     <CardHeader className="pb-2 flex-row items-center justify-between">
                                         <CardDescription>Alumnos al Día</CardDescription>
                                         <Users className="w-4 h-4 text-blue-500" />
