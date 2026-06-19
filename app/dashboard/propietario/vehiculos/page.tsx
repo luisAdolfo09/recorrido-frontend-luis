@@ -39,6 +39,7 @@ export type Vehiculo = {
     anio: number;
     capacidad: number;
     estado: "activo" | "en mantenimiento" | "eliminado";
+    fotoUrl?: string | null;
 };
 
 // --- Menú (El mismo de siempre) ---
@@ -52,6 +53,26 @@ const menuItems: MenuItem[] = [
     { title: "Enviar Avisos", description: "Comunicados a tutores y personal", icon: Bell, href: "/dashboard/propietario/avisos", color: "text-yellow-600", bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
     { title: "Generar Reportes", description: "Estadísticas y análisis", icon: BarChart3, href: "/dashboard/propietario/reportes", color: "text-red-600", bgColor: "bg-red-50 dark:bg-red-900/20" },
 ]
+
+// Miniatura del vehículo con fallback si no hay foto o la URL falla (bucket privado, etc.)
+function VehiculoThumb({ url, nombre }: { url?: string | null; nombre: string }) {
+    const [err, setErr] = useState(false);
+    if (url && !err) {
+        return (
+            <img
+                src={url}
+                alt={nombre}
+                onError={() => setErr(true)}
+                className="h-10 w-14 rounded-md object-cover border shadow-sm"
+            />
+        );
+    }
+    return (
+        <div className="h-10 w-14 rounded-md border bg-muted flex items-center justify-center" title="Sin foto">
+            <Bus className="h-4 w-4 text-muted-foreground/50" />
+        </div>
+    );
+}
 
 export default function VehiculosPage() {
     const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
@@ -293,6 +314,7 @@ export default function VehiculosPage() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
+                                            <TableHead className="w-[70px]">Foto</TableHead>
                                             <TableHead>Nombre</TableHead>
                                             <TableHead>Placa</TableHead>
                                             <TableHead>Marca / Modelo</TableHead>
@@ -304,13 +326,14 @@ export default function VehiculosPage() {
                                     <TableBody>
                                         {filteredVehiculos.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={6} className="text-center h-24">
+                                                <TableCell colSpan={7} className="text-center h-24">
                                                     No se encontraron vehículos que coincidan con los filtros.
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
                                             filteredVehiculos.map((v) => (
                                                 <TableRow key={v.id}>
+                                                    <TableCell><VehiculoThumb url={v.fotoUrl} nombre={v.nombre} /></TableCell>
                                                     <TableCell className="font-medium whitespace-nowrap">{v.nombre}</TableCell>
                                                     <TableCell className="whitespace-nowrap">{v.placa}</TableCell>
                                                     <TableCell className="whitespace-nowrap">{v.marca || "N/A"} / {v.modelo || "N/A"}</TableCell>

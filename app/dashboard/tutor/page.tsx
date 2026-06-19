@@ -10,6 +10,20 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 
+// Foto del bus con fallback: muestra el marcador "Sin foto" si no hay URL o si la imagen falla al cargar.
+function BusPhoto({ url }: { url?: string | null }) {
+  const [err, setErr] = useState(false)
+  if (url && !err) {
+    return <img src={url} alt="Bus" onError={() => setErr(true)} className="h-full w-full object-cover" />
+  }
+  return (
+    <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
+      <Bus className="h-8 w-8 opacity-20 mb-1" />
+      <span className="text-[10px]">Sin foto</span>
+    </div>
+  )
+}
+
 export default function TutorDashboard() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -137,14 +151,7 @@ export default function TutorDashboard() {
                 
                 {/* FOTO DE LA UNIDAD */}
                 <div className="h-24 w-full sm:w-32 rounded-md overflow-hidden border bg-gray-50 shrink-0 relative">
-                  {hijo.vehiculoFotoUrl ? (
-                    <img src={hijo.vehiculoFotoUrl} alt="Bus" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
-                      <Bus className="h-8 w-8 opacity-20 mb-1" />
-                      <span className="text-[10px]">Sin foto</span>
-                    </div>
-                  )}
+                  <BusPhoto url={hijo.vehiculoFotoUrl} />
                   {/* Placa sobrepuesta */}
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-0.5 truncate px-1">
                       {hijo.vehiculoPlaca || "S/P"}
