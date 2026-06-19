@@ -163,18 +163,19 @@ export default function AsistenciasTutorPage() {
                       key={hijo.id}
                       value={hijo.id}
                       className="
-                        relative flex flex-col items-center gap-1.5 px-8 py-4 min-w-[150px]
-                        text-muted-foreground rounded-none border-b-2 border-transparent
+                        group relative flex flex-col items-center gap-1.5 px-8 py-4 min-w-[150px]
+                        text-muted-foreground rounded-none border-b-[3px] border-transparent
                         transition-all duration-200
                         data-[state=active]:text-foreground
+                        data-[state=active]:font-semibold
                         data-[state=active]:border-b-primary
-                        data-[state=active]:bg-card
-                        data-[state=active]:shadow-sm
+                        data-[state=active]:bg-primary/10
+                        dark:data-[state=active]:bg-primary/25
                         hover:bg-accent/40 hover:text-foreground
                       "
                     >
                       {/* Avatar con inicial del hijo */}
-                      <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-base shadow-md ring-2 ring-background`}>
+                      <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-base shadow-md ring-2 ring-background transition-all opacity-60 grayscale-[35%] group-data-[state=active]:opacity-100 group-data-[state=active]:grayscale-0 group-data-[state=active]:scale-110 group-data-[state=active]:ring-primary group-data-[state=active]:shadow-lg`}>
                         {hijo.nombre.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-semibold text-sm">{hijo.nombre.split(' ')[0]}</span>
@@ -204,17 +205,20 @@ export default function AsistenciasTutorPage() {
                     {/* Barra de estadísticas del hijo seleccionado */}
                     {total > 0 && (
                       <div className="grid grid-cols-3 gap-px bg-border">
-                        <div className="flex flex-col items-center py-5 bg-card">
-                          <span className="text-3xl font-bold text-foreground">{total}</span>
-                          <span className="text-xs text-muted-foreground mt-1">Días registrados</span>
+                        {/* Días — azul de marca. Modo claro: sky-100 / Modo azul: sky-500 translúcido */}
+                        <div className="flex flex-col items-center py-5 bg-sky-100 dark:bg-sky-500/15">
+                          <span className="text-3xl font-bold text-sky-700 dark:text-sky-300">{total}</span>
+                          <span className="text-xs font-medium text-sky-700/70 dark:text-sky-300/70 mt-1">Días registrados</span>
                         </div>
-                        <div className="flex flex-col items-center py-5 bg-emerald-50 dark:bg-emerald-900/20">
-                          <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{presentes}</span>
-                          <span className="text-xs font-medium text-emerald-700/80 dark:text-emerald-500/70 mt-1">Presencias</span>
+                        {/* Presencias — verde */}
+                        <div className="flex flex-col items-center py-5 bg-emerald-100 dark:bg-emerald-500/15">
+                          <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{presentes}</span>
+                          <span className="text-xs font-medium text-emerald-700/80 dark:text-emerald-300/80 mt-1">Presencias</span>
                         </div>
-                        <div className="flex flex-col items-center py-5 bg-red-50 dark:bg-red-900/15">
-                          <span className="text-3xl font-bold text-red-600 dark:text-red-400">{ausentes}</span>
-                          <span className="text-xs font-medium text-red-700/80 dark:text-red-500/70 mt-1">Ausencias</span>
+                        {/* Ausencias — rojo */}
+                        <div className="flex flex-col items-center py-5 bg-red-100 dark:bg-red-500/15">
+                          <span className="text-3xl font-bold text-red-700 dark:text-red-300">{ausentes}</span>
+                          <span className="text-xs font-medium text-red-700/80 dark:text-red-300/80 mt-1">Ausencias</span>
                         </div>
                       </div>
                     )}
