@@ -445,24 +445,25 @@ export default function PagosPage() {
 
     // --- ENVIAR NOTIFICACIÓN DE MORA POR WHATSAPP ---
     const handleEnviarMora = (familia: { tutor: string; telefono: string; total: number; meses: string[]; alumnos: { nombre: string; meses: string[]; monto: number }[] }) => {
-        // Construir el mensaje de mora
-        const lineasHijos = familia.alumnos.map(a => {
+        // Construir detalle por hijo
+        const detalle = familia.alumnos.map(a => {
             const mesesTexto = a.meses.join(', ');
-            return `   📌 *${a.nombre}*\n      Meses: ${mesesTexto}\n      Monto: C$ ${a.monto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            const montoTexto = `C$ ${a.monto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            return `• *${a.nombre}*\n   Meses: ${mesesTexto}\n   Adeuda: ${montoTexto}`;
         }).join('\n\n');
 
+        const totalTexto = `C$ ${familia.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
         const mensaje =
-            `Estimado/a *${familia.tutor}* 👋\n\n` +
-            `Le saludamos del servicio de *Recorrido Escolar* 🚌\n\n` +
-            `Le notificamos que tiene un saldo pendiente de pago correspondiente al año escolar ${ANIO_ESCOLAR}.\n\n` +
-            `📋 *Detalle de su cuenta:*\n\n` +
-            `${lineasHijos}\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━\n` +
-            `💰 *Total adeudado: C$ ${familia.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\n` +
-            `━━━━━━━━━━━━━━━━━━━━\n\n` +
-            `Le agradecemos ponerse al día a la brevedad posible para garantizar la continuidad del servicio de transporte de su(s) hijo(s). 🙏\n\n` +
-            `_Si ya realizó el pago, por favor ignore este mensaje._\n\n` +
-            `¡Gracias por su comprensión! 😊`;
+            `Estimado/a *${familia.tutor}*, buen día 👋\n\n` +
+            `Le escribimos del servicio de *Recorrido Escolar* 🚌 para informarle que tiene un saldo pendiente:\n\n` +
+            `${detalle}\n\n` +
+            `——————————————\n` +
+            `💰 *Total: ${totalTexto}*\n` +
+            `——————————————\n\n` +
+            `Le pedimos amablemente ponerse al día para seguir brindando el servicio de transporte a su(s) hijo(s). 🙏\n\n` +
+            `_Si ya realizó el pago, puede ignorar este mensaje._\n\n` +
+            `¡Gracias! 😊`;
 
         // Normalizar teléfono
         let telefonoLimpio = (familia.telefono || '').replace(/[\s\-\(\)]/g, '');
