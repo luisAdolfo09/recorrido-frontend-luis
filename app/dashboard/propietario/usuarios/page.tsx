@@ -76,9 +76,9 @@ export default function UsuariosPage() {
       const listaUsuarios: UsuarioUnificado[] = users.map((u: any) => ({
           id: u.id,
           tipo: 'usuario',
-          nombre: u.nombre,
-          telefono: u.telefono,
-          username: u.username,
+          nombre: u.nombre || '',
+          telefono: u.telefono || '',
+          username: u.username || '',
           rol: u.rol,
           estatus: u.estatus || 'INVITADO'
       }));
@@ -86,8 +86,8 @@ export default function UsuariosPage() {
       const listaSolicitudes: UsuarioUnificado[] = solicitudes.map((s: any) => ({
           id: s.id,
           tipo: 'solicitud',
-          nombre: s.padreNombre,
-          telefono: s.telefono,
+          nombre: s.padreNombre || '',
+          telefono: s.telefono || '',
           estatus: 'SOLICITUD',
           hijoNombre: s.hijoNombre
       }));
@@ -107,10 +107,11 @@ export default function UsuariosPage() {
   // --- LÓGICA DE FILTRADO ---
   const filteredData = useMemo(() => {
       return dataUnificada.filter(item => {
+          const searchLower = searchTerm.toLowerCase();
           const matchSearch = 
-              item.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              item.telefono.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (item.username && item.username.toLowerCase().includes(searchTerm.toLowerCase()));
+              (item.nombre || '').toLowerCase().includes(searchLower) ||
+              (item.telefono || '').toLowerCase().includes(searchLower) ||
+              (item.username && item.username.toLowerCase().includes(searchLower));
           
           if (!matchSearch) return false;
 
