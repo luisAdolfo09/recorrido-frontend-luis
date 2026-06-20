@@ -32,7 +32,9 @@ import {
     UserX,
     CalendarClock,
     FileSpreadsheet,
-    FileText
+    FileText,
+    MessageCircle,
+    Send
 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -56,7 +58,9 @@ export type Alumno = {
     tutor: string;
     grado: string;
     precio?: number;
-    activo: boolean; 
+    activo: boolean;
+    contacto?: string;
+    tutorUser?: { nombre?: string; telefono?: string };
 };
 
 // --- MENÚ ---
@@ -155,7 +159,9 @@ export default function PagosPage() {
                     .filter(a => a.activo)
                     .map(a => ({
                         ...a,
-                        tutor: (a as any).tutorUser?.nombre || a.tutor || "Sin Tutor"
+                        tutor: (a as any).tutorUser?.nombre || a.tutor || "Sin Tutor",
+                        contacto: (a as any).tutorUser?.telefono || a.contacto || '',
+                        tutorUser: (a as any).tutorUser || undefined,
                     }));
                 setAlumnos(alumnosNormalizados);
             }
@@ -343,11 +349,12 @@ export default function PagosPage() {
 
         type FamiliaDeuda = {
             tutor: string;
+            telefono: string;
             total: number;
             meses: string[];
             alumnos: { nombre: string; meses: string[]; monto: number }[];
         };
-        const familias = new Map<string, { tutor: string; total: number; meses: Set<string>; alumnos: { nombre: string; meses: string[]; monto: number }[] }>();
+        const familias = new Map<string, { tutor: string; telefono: string; total: number; meses: Set<string>; alumnos: { nombre: string; meses: string[]; monto: number }[] }>();
 
         for (const a of alumnos) {
             const precio = Number(a.precio) || 0;
@@ -368,8 +375,11 @@ export default function PagosPage() {
             if (mesesDebe.length === 0) continue;
 
             const tutor = a.tutor || "Sin Tutor";
-            if (!familias.has(tutor)) familias.set(tutor, { tutor, total: 0, meses: new Set(), alumnos: [] });
+            const telefono = a.tutorUser?.telefono || a.contacto || '';
+            if (!familias.has(tutor)) familias.set(tutor, { tutor, telefono, total: 0, meses: new Set(), alumnos: [] });
             const f = familias.get(tutor)!;
+            // Actualizar teléfono si no lo tenía
+            if (!f.telefono && telefono) f.telefono = telefono;
             f.total += montoAlumno;
             mesesDebe.forEach(m => f.meses.add(m));
             f.alumnos.push({ nombre: a.nombre, meses: mesesDebe, monto: montoAlumno });
@@ -378,6 +388,7 @@ export default function PagosPage() {
         const lista: FamiliaDeuda[] = Array.from(familias.values())
             .map(f => ({
                 tutor: f.tutor,
+                telefono: f.telefono,
                 total: f.total,
                 alumnos: f.alumnos,
                 meses: Array.from(f.meses).sort(
@@ -430,6 +441,53 @@ export default function PagosPage() {
         if (newSet.has(tutorName)) newSet.delete(tutorName);
         else newSet.add(tutorName);
         setExpandedFamilies(newSet);
+    };
+
+    // --- ENVIAR NOTIFICACIÓN DE MORA POR WHATSAPP ---
+    const handleEnviarMora = (familia: { tutor: string; telefono: string; total: number; meses: string[]; alumnos: { nombre: string; meses: string[]; monto: number }[] }) => {
+        // Construir el mensaje de mora
+        const lineasHijos = familia.alumnos.map(a => {
+            const mesesTexto = a.meses.join(', ');
+            return `   📌 *${a.nombre}*\n      Meses: ${mesesTexto}\n      Monto: C$ ${a.monto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }).join('\n\n');
+
+        const mensaje =
+            `Estimado/a *${familia.tutor}* 👋\n\n` +
+            `Le saludamos del servicio de *Recorrido Escolar* 🚌\n\n` +
+            `Le notificamos que tiene un saldo pendiente de pago correspondiente al año escolar ${ANIO_ESCOLAR}.\n\n` +
+            `📋 *Detalle de su cuenta:*\n\n` +
+            `${lineasHijos}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `💰 *Total adeudado: C$ ${familia.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `Le agradecemos ponerse al día a la brevedad posible para garantizar la continuidad del servicio de transporte de su(s) hijo(s). 🙏\n\n` +
+            `_Si ya realizó el pago, por favor ignore este mensaje._\n\n` +
+            `¡Gracias por su comprensión! 😊`;
+
+        // Normalizar teléfono
+        let telefonoLimpio = (familia.telefono || '').replace(/[\s\-\(\)]/g, '');
+        if (telefonoLimpio.startsWith('+')) {
+            telefonoLimpio = telefonoLimpio.slice(1);
+        } else if (!telefonoLimpio.startsWith('505') && telefonoLimpio.length === 8) {
+            telefonoLimpio = `505${telefonoLimpio}`;
+        }
+
+        if (!telefonoLimpio) {
+            toast({
+                title: "Sin teléfono",
+                description: `No se encontró un número de teléfono para ${familia.tutor}. Asegúrate de que el tutor tenga un teléfono registrado.`,
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const url = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+
+        toast({
+            title: "📲 WhatsApp abierto",
+            description: `Se preparó la notificación de mora para ${familia.tutor}.`
+        });
     };
 
     // --- EXPORTACIÓN: HELPERS DE CÁLCULO ---
@@ -1077,6 +1135,21 @@ export default function PagosPage() {
                                                     {mes}
                                                 </Badge>
                                             ))}
+                                        </div>
+                                        {/* Botón de notificación de mora por WhatsApp */}
+                                        <div className="mt-3 pt-2 border-t border-dashed">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="w-full h-8 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/10 hover:bg-green-100 dark:hover:bg-green-500/20 transition-all"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEnviarMora(familia);
+                                                }}
+                                            >
+                                                <MessageCircle className="h-3.5 w-3.5 mr-2" />
+                                                Enviar aviso de mora por WhatsApp
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
