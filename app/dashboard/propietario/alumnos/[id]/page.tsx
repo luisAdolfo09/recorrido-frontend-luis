@@ -179,10 +179,12 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
         
         const base = Math.floor(nuevoTotal / count);
         const resto = nuevoTotal % count;
-        
+
         const nuevosHijos = hijos.map((h, i) => ({
             ...h,
-            precio: base + (i === 0 ? resto : 0)
+            // Redondeamos a 2 decimales para no arrastrar ruido de punto flotante
+            // (ej. 1000.7 % 3 = 1.6999999…) al precio que se muestra y se persiste.
+            precio: i === 0 ? Number((base + resto).toFixed(2)) : base
         }));
         setHijos(nuevosHijos);
     };
@@ -348,7 +350,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                 <div className="flex justify-between items-end">
                                     <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider">Estudiantes ({hijos.length})</h3>
                                     <div className="w-48">
-                                        <Label className="text-xs mb-1 block text-right font-medium text-green-600">Mensualidad Familiar (C$)</Label>
+                                        <Label className="text-xs mb-1 block text-right font-medium text-green-600 dark:text-green-400">Mensualidad Familiar (C$)</Label>
                                         <Input 
                                             type="number" 
                                             min={700}
@@ -358,7 +360,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                                 if (e.target.value !== "" && val < 0) return;
                                                 redistribuirPrecio(val);
                                             }}
-                                            className="text-right font-bold text-lg border-green-200"
+                                            className="text-right font-bold text-lg border-green-200 dark:border-green-900/30"
                                         />
                                     </div>
                                 </div>
@@ -402,7 +404,7 @@ export default function EditarFamiliaPage({ params }: { params: Promise<{ id: st
                                                 <div className="space-y-2 flex-1">
                                                     <Label className="text-xs text-muted-foreground">Cuota</Label>
                                                     <div className="h-10 flex items-center px-3 bg-muted rounded-md border text-sm text-muted-foreground">
-                                                        C$ {hijo.precio}
+                                                        C$ {Number(hijo.precio || 0).toFixed(2)}
                                                     </div>
                                                 </div>
                                                 <Button 

@@ -350,9 +350,9 @@ export default function AlumnosPage() {
   if (error && alumnos.length === 0) {
     return (
       <DashboardLayout title="Gestión de Alumnos" menuItems={menuItems}>
-        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+        <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
           <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-          <h3 className="text-xl font-bold text-red-700 mb-2">Error al cargar datos</h3>
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar datos</h3>
           <p className="text-muted-foreground max-w-md">{error}</p>
           <Button className="mt-4" onClick={fetchDatos}>
             Intentar de nuevo
@@ -369,7 +369,7 @@ export default function AlumnosPage() {
         {/* --- TARJETAS DE RESUMEN --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Tarjeta 1: Total Alumnos */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">
                 Total Alumnos ({estadoFilter === 'activo' ? 'Activos' : 'Inactivos'})
@@ -381,7 +381,7 @@ export default function AlumnosPage() {
           </Card>
 
           {/* Tarjeta 2: Capacidad */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">{cardInfo.descripcionCapacidad}</CardDescription>
             </CardHeader>
@@ -391,7 +391,7 @@ export default function AlumnosPage() {
           </Card>
 
           {/* Tarjeta 3: Ingresos Mensuales Estimados (NUEVA) */}
-          <Card>
+          <Card className="card-accent card-rise">
             <CardHeader className="pb-2">
               <CardDescription className="text-xs">
                 Ingreso Mensual Estimado

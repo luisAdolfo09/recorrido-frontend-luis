@@ -84,9 +84,9 @@ const ErrorTooltip = ({ message }: { message?: string }) => {
         // z-20 para evitar superposiciones indeseadas, absolute position
         <div className="absolute top-full left-0 mt-1 z-20 animate-in fade-in zoom-in-95 duration-200 w-full min-w-[200px]">
             {/* Triangulito */}
-            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 transform rotate-45 shadow-sm z-10" />
+            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white dark:bg-card border-t border-l border-gray-200 dark:border-gray-700 transform rotate-45 shadow-sm z-10" />
             {/* Caja del mensaje */}
-            <div className="relative bg-white border border-gray-200 text-gray-800 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
+            <div className="relative bg-white dark:bg-card border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
                 <div className="bg-orange-500 text-white rounded-sm p-0.5 shrink-0 flex items-center justify-center w-4 h-4">
                     <span className="font-bold text-[10px]">!</span>
                 </div>
@@ -350,7 +350,7 @@ export default function PagosRapidosPage() {
             }
 
             fetchData();
-            toast({ title: "Abono Registrado", description: `Se distribuyeron C$ ${abonoTotal} entre los hermanos.` });
+            toast({ title: "Abono Registrado", description: `Se distribuyeron C$ ${formatCurrency(abonoTotal)} entre los hermanos.` });
             
             // Limpiar el campo y errores
             const newAbonos = new Map(abonosDiciembre);
@@ -361,6 +361,125 @@ export default function PagosRapidosPage() {
             newErrors.delete(familia.id);
             setAbonoErrors(newErrors);
 
+        } catch (err: any) {
+            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } finally {
+            setLoadingAction(null);
+        }
+    };
+
+    // =========================================================
+    // 👤 PAGOS POR HIJO INDIVIDUAL
+    // Permite elegir a cuál(es) hijo(s) pagar (p.ej. si dos se fueron de viaje
+    // y el tutor solo abona la mensualidad de uno).
+    // =========================================================
+
+    const handlePagarMesHijo = async (hijo: Alumno) => {
+        if (!hijo.proximoMes || hijo.proximoMes === "AL DIA") return;
+        setLoadingAction(hijo.id);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+            const payload = {
+                alumnoId: hijo.id,
+                alumnoNombre: hijo.nombre,
+                monto: hijo.precio,
+                mes: hijo.proximoMes,
+                fecha: new Date().toISOString().split("T")[0],
+                estado: "pagado",
+            };
+            const res = await fetch(`${apiUrl}/pagos`, { method: 'POST', headers, body: JSON.stringify(payload) });
+            if (!res.ok) {
+                const e = await res.json().catch(() => ({}));
+                throw new Error(e.message || "No se pudo registrar el pago.");
+            }
+            await fetchData();
+            toast({ title: "Pago registrado", description: `${hijo.nombre}: ${hijo.proximoMes}.` });
+        } catch (err: any) {
+            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } finally {
+            setLoadingAction(null);
+        }
+    };
+
+    const handlePagarAnioHijo = async (hijo: Alumno) => {
+        if (!hijo.proximoMes || hijo.proximoMes === "AL DIA") return;
+        setLoadingAction(hijo.id);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+            const mesInicialIdx = MESES_REGULARES.indexOf(hijo.proximoMes.split(" ")[0]);
+            if (mesInicialIdx === -1) return;
+
+            const mesesAPagar = MESES_REGULARES.slice(mesInicialIdx).map(m => `${m} ${ANIO_ESCOLAR}`);
+            const payload = {
+                alumnoId: hijo.id,
+                alumnoNombre: hijo.nombre,
+                montoPorMes: hijo.precio || 0,
+                meses: mesesAPagar,
+                fecha: new Date().toISOString().split("T")[0],
+            };
+            const res = await fetch(`${apiUrl}/pagos/batch`, { method: 'POST', headers, body: JSON.stringify(payload) });
+            if (!res.ok) {
+                const e = await res.json().catch(() => ({}));
+                throw new Error(e.message || "No se pudo registrar el pago anual.");
+            }
+            await fetchData();
+            toast({ title: "Año pagado", description: `Se completaron los meses regulares de ${hijo.nombre}.` });
+        } catch (err: any) {
+            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } finally {
+            setLoadingAction(null);
+        }
+    };
+
+    const handleAbonarDiciembreHijo = async (hijo: Alumno) => {
+        const abonoStr = abonosDiciembre.get(hijo.id);
+        const abono = parseFloat(abonoStr || "0");
+        const max = hijo.saldoDic || 0;
+
+        if (!abono || abono <= 0) {
+            return toast({ title: "Monto inválido", description: "Ingrese un monto válido.", variant: "destructive" });
+        }
+        if (abono > max + 0.01) {
+            return toast({ title: "Monto excesivo", description: `El abono supera el saldo de Diciembre de ${hijo.nombre}.`, variant: "destructive" });
+        }
+
+        setLoadingAction(hijo.id);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+            const payload = {
+                alumnoId: hijo.id,
+                alumnoNombre: hijo.nombre,
+                monto: remainingToTwoDecimals(abono),
+                mes: MES_DICIEMBRE,
+                fecha: new Date().toISOString().split("T")[0],
+                estado: "pagado",
+            };
+            const res = await fetch(`${apiUrl}/pagos`, { method: 'POST', headers, body: JSON.stringify(payload) });
+            if (!res.ok) {
+                const e = await res.json().catch(() => ({}));
+                throw new Error(e.message || "No se pudo registrar el abono.");
+            }
+            await fetchData();
+            toast({ title: "Abono registrado", description: `${hijo.nombre}: C$ ${formatCurrency(abono)} a Diciembre.` });
+
+            const newAbonos = new Map(abonosDiciembre);
+            newAbonos.set(hijo.id, "");
+            setAbonosDiciembre(newAbonos);
+            const newErrors = new Map(abonoErrors);
+            newErrors.delete(hijo.id);
+            setAbonoErrors(newErrors);
         } catch (err: any) {
             toast({ title: "Error", description: err.message, variant: "destructive" });
         } finally {
@@ -423,7 +542,7 @@ export default function PagosRapidosPage() {
                             <div>
                                 <CardTitle>Registro Rápido de Pagos</CardTitle>
                                 <CardDescription>
-                                    Pague meses regulares (Feb-Nov) o abone a Diciembre en cualquier momento.
+                                    Pague a toda la familia, o <span className="font-medium text-foreground">despliegue una familia</span> para pagar solo a los hijos que elija.
                                 </CardDescription>
                             </div>
                         </div>
@@ -493,7 +612,7 @@ export default function PagosRapidosPage() {
                                         {/* Col 4: Saldo Diciembre (Solo texto) */}
                                         <div className="w-full md:w-1/6 flex flex-col justify-center text-left md:text-center">
                                             {esDiciembrePagado ? (
-                                                <Badge variant="secondary" className="w-fit md:mx-auto bg-purple-100 text-purple-700 hover:bg-purple-200">Pagado</Badge>
+                                                <Badge variant="secondary" className="w-fit md:mx-auto bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 hover:bg-purple-200">Pagado</Badge>
                                             ) : (
                                                 <span className="font-medium text-sm">C$ {formatCurrency(familia.deudaDiciembreTotal)}</span>
                                             )}
@@ -577,25 +696,105 @@ export default function PagosRapidosPage() {
                                         </div>
                                     </div>
 
-                                    {/* DETALLES DESPLEGABLES (HIJOS) */}
+                                    {/* DETALLES DESPLEGABLES (PAGO INDIVIDUAL POR HIJO) */}
                                     {isExpanded && (
-                                        <div className="bg-muted/30 p-3 border-t border-border text-sm">
-                                            <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">Integrantes de la familia:</p>
+                                        <div className="bg-muted/30 p-3 border-t border-border text-sm" onClick={e => e.stopPropagation()}>
+                                            <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">
+                                                Pago individual por hijo — elige a quién pagar
+                                            </p>
                                             <div className="grid gap-2 md:grid-cols-2">
-                                                {familia.alumnos.map(hijo => (
-                                                    <div key={hijo.id} className="flex justify-between bg-card p-2 rounded border shadow-sm">
-                                                        <div>
-                                                            <span className="font-medium">{hijo.nombre}</span>
-                                                            <span className="text-xs text-muted-foreground ml-2">({hijo.grado})</span>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <div className="text-xs">Cuota: C$ {formatCurrency(hijo.precio || 0)}</div>
-                                                            <div className={`text-xs font-medium ${hijo.proximoMes === 'AL DIA' ? 'text-green-600' : 'text-orange-600'}`}>
-                                                                {hijo.proximoMes === 'AL DIA' ? 'Al día' : `Debe ${hijo.proximoMes}`}
+                                                {familia.alumnos.map(hijo => {
+                                                    const hijoLoading = loadingAction === hijo.id;
+                                                    const hijoAlDia = !hijo.proximoMes || hijo.proximoMes === 'AL DIA';
+                                                    const hijoDicPagado = (hijo.saldoDic || 0) <= 0.01;
+                                                    const hijoMeses = hijo.mesesRestantes || 0;
+                                                    const hijoAbonoVal = abonosDiciembre.get(hijo.id) || '';
+                                                    const hijoAbonoError = abonoErrors.get(hijo.id);
+                                                    const hijoAbonoDisabled = hijoLoading || hijoDicPagado || !!hijoAbonoError || hijoAbonoVal === '';
+
+                                                    return (
+                                                        <div key={hijo.id} className="bg-card p-3 rounded-lg border shadow-sm space-y-2">
+                                                            {/* Info del hijo */}
+                                                            <div className="flex justify-between items-start gap-2">
+                                                                <div className="min-w-0">
+                                                                    <span className="font-medium">{hijo.nombre}</span>
+                                                                    <span className="text-xs text-muted-foreground ml-1">({hijo.grado})</span>
+                                                                    <div className="text-xs text-muted-foreground">Cuota: C$ {formatCurrency(hijo.precio || 0)}</div>
+                                                                </div>
+                                                                {hijoAlDia ? (
+                                                                    <Badge className="bg-green-600 shrink-0">Al día</Badge>
+                                                                ) : (
+                                                                    <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-900/30 dark:text-orange-400 shrink-0">
+                                                                        Debe {hijo.proximoMes?.split(' ')[0]}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Acciones de meses regulares */}
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    className="h-8 text-xs"
+                                                                    disabled={hijoLoading || hijoAlDia}
+                                                                    onClick={() => handlePagarMesHijo(hijo)}
+                                                                >
+                                                                    {hijoLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Check className="mr-1 h-3 w-3" />}
+                                                                    Pagar Mes
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="h-8 text-xs"
+                                                                    disabled={hijoLoading || hijoAlDia || hijoMeses <= 1}
+                                                                    onClick={() => handlePagarAnioHijo(hijo)}
+                                                                >
+                                                                    {hijoLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <CheckCheck className="mr-1 h-3 w-3" />}
+                                                                    Pagar Año
+                                                                </Button>
+                                                            </div>
+
+                                                            {/* Abono individual a Diciembre */}
+                                                            <div className="relative group">
+                                                                <div className="flex gap-2 items-center">
+                                                                    <Input
+                                                                        type="number"
+                                                                        placeholder={hijoDicPagado ? 'Diciembre pagado' : `Abono Dic (Max: ${formatCurrency(hijo.saldoDic || 0)})`}
+                                                                        value={hijoAbonoVal}
+                                                                        onChange={(e) => {
+                                                                            const valStr = e.target.value;
+                                                                            const val = parseFloat(valStr);
+                                                                            const maxd = hijo.saldoDic || 0;
+                                                                            setAbonosDiciembre(new Map(abonosDiciembre.set(hijo.id, valStr)));
+                                                                            const newErrors = new Map(abonoErrors);
+                                                                            if (valStr !== '') {
+                                                                                if (val <= 0) newErrors.set(hijo.id, 'El monto debe ser mayor a 0.');
+                                                                                else if (val > maxd + 0.01) newErrors.set(hijo.id, `Máximo: C$ ${formatCurrency(maxd)}`);
+                                                                                else newErrors.delete(hijo.id);
+                                                                            } else {
+                                                                                newErrors.delete(hijo.id);
+                                                                            }
+                                                                            setAbonoErrors(newErrors);
+                                                                        }}
+                                                                        disabled={hijoLoading || hijoDicPagado}
+                                                                        className={`h-8 text-xs ${hijoAbonoError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                                                                    />
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="secondary"
+                                                                        className="h-8 text-xs shrink-0"
+                                                                        disabled={hijoAbonoDisabled}
+                                                                        onClick={() => handleAbonarDiciembreHijo(hijo)}
+                                                                    >
+                                                                        <Gift className="mr-1 h-3 w-3" /> Abonar
+                                                                    </Button>
+                                                                </div>
+                                                                <div className="hidden group-focus-within:block group-hover:block">
+                                                                    <ErrorTooltip message={hijoAbonoError} />
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}

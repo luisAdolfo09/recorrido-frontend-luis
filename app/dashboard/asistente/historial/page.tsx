@@ -162,11 +162,11 @@ export default function HistorialPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1 text-green-600">
+                          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                             <CheckCircle className="h-4 w-4" /> {presentes}{" "}
                             Presentes
                           </div>
-                          <div className="flex items-center gap-1 text-red-600">
+                          <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
                             <XCircle className="h-4 w-4" /> {ausentes} Ausentes
                           </div>
                           <Button

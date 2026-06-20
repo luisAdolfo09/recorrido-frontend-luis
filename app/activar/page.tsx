@@ -39,7 +39,7 @@ const API_URL =
 // ─── Vista de carga ───────────────────────────────────────────────────────────
 function LoadingView() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
       <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
       <p className="text-muted-foreground text-sm">Verificando enlace…</p>
     </div>
@@ -49,16 +49,16 @@ function LoadingView() {
 // ─── Vista de error ───────────────────────────────────────────────────────────
 function ErrorView({ mensaje }: { mensaje: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md text-center border-red-200 bg-red-50 shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+      <Card className="w-full max-w-md text-center border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 shadow-lg">
         <CardContent className="pt-10 pb-8 space-y-4">
-          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="h-8 w-8 text-red-600" />
+          <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
-          <h2 className="text-xl font-bold text-red-800">
+          <h2 className="text-xl font-bold text-red-800 dark:text-red-400">
             Enlace inválido o caducado
           </h2>
-          <p className="text-red-700/80 text-sm leading-relaxed">{mensaje}</p>
+          <p className="text-red-700/80 dark:text-red-400 text-sm leading-relaxed">{mensaje}</p>
           <Button
             className="w-full bg-red-600 hover:bg-red-700 text-white"
             onClick={() => (window.location.href = "/login")}
@@ -74,19 +74,19 @@ function ErrorView({ mensaje }: { mensaje: string }) {
 // ─── Vista de éxito ───────────────────────────────────────────────────────────
 function SuccessView() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-green-50 dark:bg-green-900/20 p-4">
       <div className="text-center space-y-4 animate-in fade-in zoom-in duration-500">
-        <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
-          <CheckCircle className="h-10 w-10 text-green-600" />
+        <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center shadow-sm">
+          <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="text-2xl font-bold text-green-800">¡Cuenta Activada!</h2>
-        <p className="text-green-700 text-sm">
+        <h2 className="text-2xl font-bold text-green-800 dark:text-green-400">¡Cuenta Activada!</h2>
+        <p className="text-green-700 dark:text-green-400 text-sm">
           Tu contraseña ha sido guardada correctamente.
         </p>
-        <p className="text-green-600 text-sm font-medium">
+        <p className="text-green-600 dark:text-green-400 text-sm font-medium">
           Redirigiendo al login…
         </p>
-        <Loader2 className="h-5 w-5 animate-spin text-green-600 mx-auto" />
+        <Loader2 className="h-5 w-5 animate-spin text-green-600 dark:text-green-400 mx-auto" />
       </div>
     </div>
   );
@@ -204,7 +204,7 @@ function ActivarContent() {
   if (step === "exito") return <SuccessView />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
       <Card className="w-full max-w-md shadow-xl border-t-4 border-t-primary animate-in fade-in duration-300">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
@@ -281,7 +281,7 @@ function ActivarContent() {
 
             {/* Error de formulario */}
             {formError && (
-              <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+              <div className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-900/30">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>{formError}</span>
               </div>

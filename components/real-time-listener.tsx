@@ -67,7 +67,7 @@ export default function RealTimeListener() {
         
         toast({
             title: "💰 Pago Registrado",
-            description: `C$ ${Number(data.monto).toLocaleString()} - ${data.alumnoNombre}`,
+            description: `C$ ${Number(data.monto || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - ${data.alumnoNombre}`,
             className: "border-l-4 border-green-500 bg-white dark:bg-slate-950 shadow-lg"
         });
         

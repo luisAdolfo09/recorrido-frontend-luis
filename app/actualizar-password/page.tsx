@@ -92,11 +92,11 @@ export default function ActualizarPasswordPage() {
 
   if (verificando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700">Verificando enlace seguro...</h2>
-          <p className="text-gray-500 mt-2">Estamos validando tu acceso.</p>
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-sky-300 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-slate-100">Verificando enlace seguro...</h2>
+          <p className="text-gray-500 dark:text-slate-400 mt-2">Estamos validando tu acceso.</p>
         </div>
       </div>
     );
@@ -104,13 +104,13 @@ export default function ActualizarPasswordPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
         <Card className="w-full max-w-md text-center p-6">
-          <div className="mb-4 text-red-500 flex justify-center">
+          <div className="mb-4 text-red-500 dark:text-red-400 flex justify-center">
             <Lock className="h-12 w-12" />
           </div>
           <h2 className="text-xl font-bold mb-2">Enlace no válido o expirado</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-slate-400 mb-6">
             No pudimos detectar una sesión activa. Es posible que el enlace ya haya sido usado o haya caducado.
           </p>
           <Button onClick={() => router.push("/login")} variant="outline">
@@ -122,16 +122,16 @@ export default function ActualizarPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center border-b bg-white/50">
-          <div className="mx-auto bg-blue-100 p-3 rounded-full w-fit mb-4">
-            <Lock className="w-6 h-6 text-blue-600" />
+        <CardHeader className="text-center border-b bg-white/50 dark:bg-card">
+          <div className="mx-auto bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full w-fit mb-4">
+            <Lock className="w-6 h-6 text-blue-600 dark:text-sky-300" />
           </div>
           <CardTitle className="text-2xl">Establecer Contraseña</CardTitle>
           <CardDescription>
             Hola{" "}
-            <span className="font-bold text-blue-700">
+            <span className="font-bold text-blue-700 dark:text-sky-300">
               {session.user?.user_metadata?.nombre || "Usuario"}
             </span>
             .<br />Crea tu contraseña definitiva para activar tu cuenta.

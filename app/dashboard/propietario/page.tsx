@@ -53,8 +53,8 @@ const ErrorTooltip = ({ message }: { message?: string }) => {
     if (!message) return null;
     return (
         <div className="absolute top-full left-0 mt-1 z-50 animate-in fade-in zoom-in-95 duration-200 w-full min-w-[200px]">
-            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 transform rotate-45 shadow-sm z-10" />
-            <div className="relative bg-white border border-gray-200 text-gray-800 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
+            <div className="absolute -top-[5px] left-4 w-3 h-3 bg-white dark:bg-slate-900 border-t border-l border-gray-200 dark:border-slate-700 transform rotate-45 shadow-sm z-10" />
+            <div className="relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-100 text-xs px-3 py-2 rounded-md shadow-lg flex items-center gap-2">
                 <div className="bg-orange-500 text-white rounded-sm p-0.5 shrink-0 flex items-center justify-center w-4 h-4">
                     <span className="font-bold text-[10px]">!</span>
                 </div>
@@ -357,7 +357,7 @@ export default function PropietarioDashboard() {
             {/* 1. Suspensión */}
             <Dialog open={isEmergencyOpen} onOpenChange={setIsEmergencyOpen}>
                 <DialogTrigger asChild>
-                    <Card onClick={openEmergencyModal} className="border-l-8 border-l-red-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card onClick={openEmergencyModal} className="card-interactive border-l-8 border-l-red-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-red-600 uppercase flex justify-between">
                                 Emergencia <AlertTriangle className="h-5 w-5 group-hover:scale-110 transition-transform"/>
@@ -417,7 +417,7 @@ export default function PropietarioDashboard() {
             {/* 2. Configuración (RANGOS VALIDADOS) */}
             <Dialog open={isConfigOpen} onOpenChange={(open) => { setIsConfigOpen(open); if (open) fetchConfig(); }}>
                 <DialogTrigger asChild>
-                    <Card className="border-l-8 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card className="card-interactive border-l-8 border-l-blue-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-blue-600 uppercase flex justify-between">
                                 Administración <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform"/>
@@ -495,7 +495,7 @@ export default function PropietarioDashboard() {
             {/* 3. MANTENIMIENTO ANUAL (Ámbar) - BOTONES ARREGLADOS */}
             <Dialog open={isPromoteOpen} onOpenChange={(open) => { setIsPromoteOpen(open); setIsPromoteConfirming(false); }}>
                 <DialogTrigger asChild>
-                    <Card className="border-l-8 border-l-amber-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
+                    <Card className="card-interactive border-l-8 border-l-amber-500 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-amber-600 uppercase flex justify-between">
                                 Fin de Año <GraduationCap className="h-6 w-6 group-hover:scale-110 transition-transform"/>
@@ -521,7 +521,7 @@ export default function PropietarioDashboard() {
 
                     {!isPromoteConfirming ? (
                         <div className="py-4 space-y-4">
-                            <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 text-sm text-amber-800">
+                            <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-100 dark:border-amber-900/30 text-sm text-amber-800 dark:text-amber-300">
                                 <p className="font-semibold mb-2">Al ejecutar esta acción:</p>
                                 <ul className="list-disc list-inside space-y-1">
                                     <li>Alumnos de <strong>1° a 5°</strong> serán promovidos al siguiente grado.</li>
@@ -542,11 +542,11 @@ export default function PropietarioDashboard() {
                         // VISTA 2: Confirmación sin input, solo botones
                         <div className="py-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                             <div className="text-center space-y-3">
-                                <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                                <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                                    <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900">¿Estás absolutamente seguro?</h3>
-                                <p className="text-sm text-gray-500 px-4">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">¿Estás absolutamente seguro?</h3>
+                                <p className="text-sm text-gray-500 dark:text-slate-400 px-4">
                                     Esta acción modificará masivamente los grados de todos los estudiantes activos. No se puede deshacer fácilmente.
                                 </p>
                             </div>
@@ -580,7 +580,7 @@ export default function PropietarioDashboard() {
         {/* RESUMEN OPERATIVO */}
         <h3 className="text-lg font-semibold text-muted-foreground pt-4">Resumen Operativo</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Alumnos Activos</CardDescription>
                     <Users className="h-4 w-4 text-muted-foreground" />
@@ -590,17 +590,17 @@ export default function PropietarioDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">Total registrados</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Pagos ({stats.mesActual})</CardDescription>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">C$ {stats.pagosMesTotal.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">C$ {Number(stats.pagosMesTotal || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     <p className="text-xs text-muted-foreground mt-1">Recaudado este mes</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Personal</CardDescription>
                     <UserCog className="h-4 w-4 text-muted-foreground" />
@@ -610,7 +610,7 @@ export default function PropietarioDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">Choferes y Asistentes</p>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="card-accent card-rise">
                 <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                     <CardDescription className="text-xs font-medium">Vehículos</CardDescription>
                     <Bus className="h-4 w-4 text-muted-foreground" />

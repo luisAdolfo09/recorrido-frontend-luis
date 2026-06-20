@@ -132,15 +132,15 @@ export default function AsistenciasTutorPage() {
   return (
     <TutorLayout title="Registro de Asistencias">
       <div className="space-y-6">
-        <Card className="overflow-hidden border-0 shadow-md">
-          <CardHeader className="bg-gradient-to-r from-slate-700/60 to-slate-800/60 border-b border-white/5 pb-4">
+        <Card className="overflow-hidden border shadow-sm py-0 card-rise">
+          <CardHeader className="btn-primary-gradient px-6 pt-5 pb-4 gap-0">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/20">
-                <CalendarCheck className="h-5 w-5 text-blue-400" />
+              <div className="p-2 rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20">
+                <CalendarCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-white">Asistencia por Alumno</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-white text-lg">Asistencia por Alumno</CardTitle>
+                <CardDescription className="text-blue-100/85">
                   Selecciona un hijo para ver su historial de asistencia.
                 </CardDescription>
               </div>
@@ -151,7 +151,7 @@ export default function AsistenciasTutorPage() {
             <Tabs defaultValue={defaultTab} className="w-full">
               
               {/* ── Pestañas de hijos con avatar, nombre y porcentaje ── */}
-              <TabsList className="w-full rounded-none border-b border-white/10 bg-slate-800/40 h-auto p-0 gap-0 justify-start overflow-x-auto">
+              <TabsList className="w-full rounded-none border-b bg-muted/30 h-auto p-0 gap-0 justify-start overflow-x-auto">
                 {hijosData.map((hijo, idx) => {
                   const presentes = hijo.registros.filter(r => r.estado === 'presente').length
                   const total = hijo.registros.length
@@ -163,25 +163,27 @@ export default function AsistenciasTutorPage() {
                       key={hijo.id}
                       value={hijo.id}
                       className="
-                        relative flex flex-col items-center gap-1.5 px-8 py-4 min-w-[160px]
-                        text-slate-400 rounded-none border-b-2 border-transparent
+                        group relative flex flex-col items-center gap-1.5 px-8 py-4 min-w-[150px]
+                        text-muted-foreground rounded-none border-b-[3px] border-transparent
                         transition-all duration-200
-                        data-[state=active]:text-white
-                        data-[state=active]:border-b-blue-400
-                        data-[state=active]:bg-white/5
-                        hover:bg-white/5 hover:text-slate-200
+                        data-[state=active]:text-foreground
+                        data-[state=active]:font-semibold
+                        data-[state=active]:border-b-primary
+                        data-[state=active]:bg-primary/10
+                        dark:data-[state=active]:bg-primary/25
+                        hover:bg-accent/40 hover:text-foreground
                       "
                     >
                       {/* Avatar con inicial del hijo */}
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                      <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-base shadow-md ring-2 ring-background transition-all opacity-60 grayscale-[35%] group-data-[state=active]:opacity-100 group-data-[state=active]:grayscale-0 group-data-[state=active]:scale-110 group-data-[state=active]:ring-primary group-data-[state=active]:shadow-lg`}>
                         {hijo.nombre.charAt(0).toUpperCase()}
                       </div>
-                      <span className="font-medium text-sm">{hijo.nombre.split(' ')[0]}</span>
+                      <span className="font-semibold text-sm">{hijo.nombre.split(' ')[0]}</span>
                       {pct !== null && (
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          pct >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
-                          pct >= 75 ? 'bg-amber-500/20 text-amber-400' :
-                                      'bg-red-500/20 text-red-400'
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                          pct >= 90 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                          pct >= 75 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                                      'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
                         }`}>
                           {pct}% asistencia
                         </span>
@@ -202,24 +204,27 @@ export default function AsistenciasTutorPage() {
 
                     {/* Barra de estadísticas del hijo seleccionado */}
                     {total > 0 && (
-                      <div className="grid grid-cols-3 gap-px bg-white/5">
-                        <div className="flex flex-col items-center py-4 bg-slate-800/30">
-                          <span className="text-2xl font-bold text-slate-100">{total}</span>
-                          <span className="text-xs text-slate-400 mt-0.5">Días registrados</span>
+                      <div className="grid grid-cols-3 gap-px bg-border">
+                        {/* Días — azul de marca. Modo claro: sky-100 / Modo azul: sky-500 translúcido */}
+                        <div className="flex flex-col items-center py-5 bg-sky-100 dark:bg-sky-500/15">
+                          <span className="text-3xl font-bold text-sky-700 dark:text-sky-300">{total}</span>
+                          <span className="text-xs font-medium text-sky-700/70 dark:text-sky-300/70 mt-1">Días registrados</span>
                         </div>
-                        <div className="flex flex-col items-center py-4 bg-emerald-900/20 border-x border-white/5">
-                          <span className="text-2xl font-bold text-emerald-400">{presentes}</span>
-                          <span className="text-xs text-emerald-500/70 mt-0.5">Presencias</span>
+                        {/* Presencias — verde */}
+                        <div className="flex flex-col items-center py-5 bg-emerald-100 dark:bg-emerald-500/15">
+                          <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{presentes}</span>
+                          <span className="text-xs font-medium text-emerald-700/80 dark:text-emerald-300/80 mt-1">Presencias</span>
                         </div>
-                        <div className="flex flex-col items-center py-4 bg-red-900/10">
-                          <span className="text-2xl font-bold text-red-400">{ausentes}</span>
-                          <span className="text-xs text-red-500/70 mt-0.5">Ausencias</span>
+                        {/* Ausencias — rojo */}
+                        <div className="flex flex-col items-center py-5 bg-red-100 dark:bg-red-500/15">
+                          <span className="text-3xl font-bold text-red-700 dark:text-red-300">{ausentes}</span>
+                          <span className="text-xs font-medium text-red-700/80 dark:text-red-300/80 mt-1">Ausencias</span>
                         </div>
                       </div>
                     )}
 
                     {/* Lista de registros con diferenciación visual por color */}
-                    <div className="p-4 space-y-2">
+                    <div className="p-4 space-y-2.5 bg-muted/20">
                       {hijo.registros && hijo.registros.length > 0 ? (
                         hijo.registros.map((asistencia) => {
                           const esPresente = asistencia.estado === 'presente'
@@ -227,32 +232,32 @@ export default function AsistenciasTutorPage() {
                             <div
                               key={asistencia.id}
                               className={`
-                                flex items-center justify-between p-3.5 rounded-xl border
-                                transition-all duration-150 hover:scale-[1.005]
+                                flex items-center justify-between p-3.5 rounded-xl border bg-card
+                                transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md
                                 ${esPresente
-                                  ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/30'
-                                  : 'bg-red-500/5 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30'
+                                  ? 'border-l-4 border-l-emerald-500 border-emerald-200/70 dark:border-emerald-500/20'
+                                  : 'border-l-4 border-l-red-500 border-red-200/70 dark:border-red-500/20'
                                 }
                               `}
                             >
                               <div className="flex items-center gap-3">
                                 {/* Ícono con fondo semitransparente */}
-                                <div className={`p-1.5 rounded-lg ${esPresente ? 'bg-emerald-500/15' : 'bg-red-500/15'}`}>
+                                <div className={`p-2 rounded-lg ${esPresente ? 'bg-emerald-100 dark:bg-emerald-500/15' : 'bg-red-100 dark:bg-red-500/15'}`}>
                                   {esPresente
-                                    ? <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                                    : <XCircle className="h-5 w-5 text-red-400" />
+                                    ? <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    : <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                                   }
                                 </div>
 
                                 <div>
-                                  <p className="font-semibold text-sm capitalize text-slate-100">
+                                  <p className="font-semibold text-sm capitalize text-foreground">
                                     {new Date(asistencia.fecha + "T00:00:00").toLocaleDateString("es-MX", {
                                       weekday: "long",
                                       day: "numeric",
                                       month: "long",
                                     })}
                                   </p>
-                                  <p className="text-xs text-slate-500 mt-0.5">
+                                  <p className="text-xs text-muted-foreground mt-0.5">
                                     Registrado a las {new Date(asistencia.fechaCreacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 </div>
@@ -273,11 +278,11 @@ export default function AsistenciasTutorPage() {
                         })
                       ) : (
                         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                          <div className="p-4 rounded-full bg-slate-700/40 mb-3">
-                            <AlertCircle className="h-8 w-8 opacity-40" />
+                          <div className="p-4 rounded-full bg-muted mb-3">
+                            <AlertCircle className="h-8 w-8 opacity-50" />
                           </div>
-                          <p className="text-sm font-medium">Sin registros para {hijo.nombre}</p>
-                          <p className="text-xs mt-1 text-slate-500">Los registros aparecerán cuando el asistente tome asistencia.</p>
+                          <p className="text-sm font-medium text-foreground">Sin registros para {hijo.nombre}</p>
+                          <p className="text-xs mt-1 text-muted-foreground">Los registros aparecerán cuando el asistente tome asistencia.</p>
                         </div>
                       )}
                     </div>

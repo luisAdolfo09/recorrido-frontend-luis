@@ -10,6 +10,20 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 
+// Foto del bus con fallback: muestra el marcador "Sin foto" si no hay URL o si la imagen falla al cargar.
+function BusPhoto({ url }: { url?: string | null }) {
+  const [err, setErr] = useState(false)
+  if (url && !err) {
+    return <img src={url} alt="Bus" onError={() => setErr(true)} className="h-full w-full object-cover" />
+  }
+  return (
+    <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
+      <Bus className="h-8 w-8 opacity-20 mb-1" />
+      <span className="text-[10px]">Sin foto</span>
+    </div>
+  )
+}
+
 export default function TutorDashboard() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -137,14 +151,7 @@ export default function TutorDashboard() {
                 
                 {/* FOTO DE LA UNIDAD */}
                 <div className="h-24 w-full sm:w-32 rounded-md overflow-hidden border bg-gray-50 shrink-0 relative">
-                  {hijo.vehiculoFotoUrl ? (
-                    <img src={hijo.vehiculoFotoUrl} alt="Bus" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
-                      <Bus className="h-8 w-8 opacity-20 mb-1" />
-                      <span className="text-[10px]">Sin foto</span>
-                    </div>
-                  )}
+                  <BusPhoto url={hijo.vehiculoFotoUrl} />
                   {/* Placa sobrepuesta */}
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center py-0.5 truncate px-1">
                       {hijo.vehiculoPlaca || "S/P"}
@@ -154,11 +161,11 @@ export default function TutorDashboard() {
                 <div className="flex items-center gap-3 flex-1 w-full">
                   {hijo.estadoHoy === 'presente' && (
                     <>
-                      <div className="bg-green-100 p-3 rounded-full shrink-0">
-                        <CheckCircle2 className="h-8 w-8 text-green-600" />
+                      <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-full shrink-0">
+                        <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-green-700">A bordo</p>
+                        <p className="font-bold text-lg text-green-700 dark:text-green-400">A bordo</p>
                         <p className="text-sm text-muted-foreground">
                           Registrado: {hijo.horaRecogida ? new Date(hijo.horaRecogida).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                         </p>
@@ -167,22 +174,22 @@ export default function TutorDashboard() {
                   )}
                   {hijo.estadoHoy === 'ausente' && (
                     <>
-                      <div className="bg-red-100 p-3 rounded-full shrink-0">
-                        <AlertCircle className="h-8 w-8 text-red-600" />
+                      <div className="bg-red-100 dark:bg-red-900/20 p-3 rounded-full shrink-0">
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-red-700">Ausente</p>
+                        <p className="font-bold text-lg text-red-700 dark:text-red-400">Ausente</p>
                         <p className="text-sm text-muted-foreground">No asiste hoy.</p>
                       </div>
                     </>
                   )}
                   {hijo.estadoHoy === 'pendiente' && (
                     <>
-                      <div className="bg-yellow-100 p-3 rounded-full shrink-0">
-                        <Clock className="h-8 w-8 text-yellow-600" />
+                      <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-full shrink-0">
+                        <Clock className="h-8 w-8 text-yellow-600 dark:text-yellow-300" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-yellow-700">Esperando</p>
+                        <p className="font-bold text-lg text-yellow-700 dark:text-yellow-300">Esperando</p>
                         <p className="text-sm text-muted-foreground">Sin registro aún.</p>
                       </div>
                     </>
@@ -195,7 +202,7 @@ export default function TutorDashboard() {
 
         {/* --- TARJETA DE PAGOS --- */}
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="md:col-span-1 hover:shadow-md transition-shadow">
+          <Card className="md:col-span-1 hover:shadow-md transition-shadow card-accent card-rise">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">Estado de Cuenta</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -203,11 +210,11 @@ export default function TutorDashboard() {
             <CardContent>
               <div className="flex justify-between items-center mt-2">
                 <div>
-                  <p className="text-2xl font-bold">C$ {data.pagos?.montoPendiente || 0}</p>
+                  <p className="text-2xl font-bold">C$ {Number(data.pagos?.montoPendiente || 0).toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-muted-foreground">Saldo pendiente</p>
                 </div>
                 {data.pagos?.estado === 'al_dia' ? (
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">Al día</Badge>
+                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30">Al día</Badge>
                 ) : (
                     <Badge variant="destructive">Pendiente</Badge>
                 )}

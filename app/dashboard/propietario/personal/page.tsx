@@ -184,7 +184,7 @@ export default function PersonalPage() {
 
                 {/* Resumen */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Total Personal ({estadoFilter})</CardDescription>
                         </CardHeader>
@@ -192,7 +192,7 @@ export default function PersonalPage() {
                             <div className="text-xl md:text-2xl font-bold">{totalPersonal}</div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Total Salarios (Mensual)</CardDescription>
                         </CardHeader>
@@ -234,7 +234,7 @@ export default function PersonalPage() {
 
                 {/* Tabla */}
                 {personal.length === 0 && !loading ? (
-                    <div className="text-center py-10 text-muted-foreground border rounded-md bg-gray-50">
+                    <div className="text-center py-10 text-muted-foreground border rounded-md bg-gray-50 dark:bg-slate-900">
                         No hay personal registrado con este filtro.
                     </div>
                 ) : (

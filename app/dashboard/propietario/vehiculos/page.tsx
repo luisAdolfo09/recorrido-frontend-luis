@@ -39,6 +39,7 @@ export type Vehiculo = {
     anio: number;
     capacidad: number;
     estado: "activo" | "en mantenimiento" | "eliminado";
+    fotoUrl?: string | null;
 };
 
 // --- Menú (El mismo de siempre) ---
@@ -52,6 +53,26 @@ const menuItems: MenuItem[] = [
     { title: "Enviar Avisos", description: "Comunicados a tutores y personal", icon: Bell, href: "/dashboard/propietario/avisos", color: "text-yellow-600", bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
     { title: "Generar Reportes", description: "Estadísticas y análisis", icon: BarChart3, href: "/dashboard/propietario/reportes", color: "text-red-600", bgColor: "bg-red-50 dark:bg-red-900/20" },
 ]
+
+// Miniatura del vehículo con fallback si no hay foto o la URL falla (bucket privado, etc.)
+function VehiculoThumb({ url, nombre }: { url?: string | null; nombre: string }) {
+    const [err, setErr] = useState(false);
+    if (url && !err) {
+        return (
+            <img
+                src={url}
+                alt={nombre}
+                onError={() => setErr(true)}
+                className="h-10 w-14 rounded-md object-cover border shadow-sm"
+            />
+        );
+    }
+    return (
+        <div className="h-10 w-14 rounded-md border bg-muted flex items-center justify-center" title="Sin foto">
+            <Bus className="h-4 w-4 text-muted-foreground/50" />
+        </div>
+    );
+}
 
 export default function VehiculosPage() {
     const [vehiculos, setVehiculos] = useState<Vehiculo[]>([])
@@ -194,9 +215,9 @@ export default function VehiculosPage() {
     if (error && vehiculos.length === 0) {
         return (
             <DashboardLayout title="Gestión de Vehículos" menuItems={menuItems}>
-                <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 rounded-lg border border-red-100">
+                <div className="flex flex-col justify-center items-center h-64 text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
                     <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-                    <h3 className="text-xl font-bold text-red-700 mb-2">Error al cargar datos</h3>
+                    <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">Error al cargar datos</h3>
                     <p className="text-muted-foreground max-w-md">{error}</p>
                     <Button className="mt-4" onClick={fetchVehiculos}>
                         Intentar de nuevo
@@ -212,7 +233,7 @@ export default function VehiculosPage() {
 
                 {/* --- TARJETAS (ESTILO ORIGINAL) --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">
                                 Total Vehículos ({estadoFilter === 'activo' ? 'Activos' : 'En Mantenimiento'})
@@ -222,7 +243,7 @@ export default function VehiculosPage() {
                             <div className="text-xl md:text-2xl font-bold">{totalVehiculos}</div>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="card-accent card-rise">
                         <CardHeader className="pb-2">
                             <CardDescription className="text-xs">Capacidad Total (Asientos)</CardDescription>
                         </CardHeader>
@@ -293,6 +314,7 @@ export default function VehiculosPage() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
+                                            <TableHead className="w-[70px]">Foto</TableHead>
                                             <TableHead>Nombre</TableHead>
                                             <TableHead>Placa</TableHead>
                                             <TableHead>Marca / Modelo</TableHead>
@@ -304,13 +326,14 @@ export default function VehiculosPage() {
                                     <TableBody>
                                         {filteredVehiculos.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={6} className="text-center h-24">
+                                                <TableCell colSpan={7} className="text-center h-24">
                                                     No se encontraron vehículos que coincidan con los filtros.
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
                                             filteredVehiculos.map((v) => (
                                                 <TableRow key={v.id}>
+                                                    <TableCell><VehiculoThumb url={v.fotoUrl} nombre={v.nombre} /></TableCell>
                                                     <TableCell className="font-medium whitespace-nowrap">{v.nombre}</TableCell>
                                                     <TableCell className="whitespace-nowrap">{v.placa}</TableCell>
                                                     <TableCell className="whitespace-nowrap">{v.marca || "N/A"} / {v.modelo || "N/A"}</TableCell>

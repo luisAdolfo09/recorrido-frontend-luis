@@ -298,7 +298,7 @@ export default function UsuariosPage() {
                                             <span className="font-medium">{item.nombre}</span>
                                             <span className="text-xs text-muted-foreground">{item.telefono}</span>
                                             {item.hijoNombre && (
-                                                <span className="text-xs text-orange-600 mt-1">Hijo: {item.hijoNombre}</span>
+                                                <span className="text-xs text-orange-600 dark:text-orange-400 mt-1">Hijo: {item.hijoNombre}</span>
                                             )}
                                         </div>
                                     </TableCell>
@@ -306,7 +306,7 @@ export default function UsuariosPage() {
                                     {/* Columna 2: Rol */}
                                     <TableCell>
                                         {item.tipo === 'solicitud' ? (
-                                            <Badge variant="outline" className="border-orange-300 text-orange-700 bg-orange-50">Solicitud</Badge>
+                                            <Badge variant="outline" className="border-orange-300 dark:border-orange-900/30 text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20">Solicitud</Badge>
                                         ) : (
                                             <div className="flex items-center gap-2 capitalize">
                                                 {item.rol === 'propietario' ? <Shield className="h-3 w-3 text-purple-600"/> : <User className="h-3 w-3 text-blue-600"/>}
@@ -317,15 +317,15 @@ export default function UsuariosPage() {
 
                                     {/* Columna 3: Estado */}
                                     <TableCell>
-                                        {item.estatus === 'ACTIVO' && <Badge className="bg-green-100 text-green-800 hover:bg-green-100 shadow-none">Activo</Badge>}
+                                        {item.estatus === 'ACTIVO' && <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 hover:bg-green-100 shadow-none">Activo</Badge>}
                                         {item.estatus === 'INVITADO' && <Badge variant="secondary" className="text-xs">Pendiente</Badge>}
-                                        {item.estatus === 'SOLICITUD' && <Badge variant="outline" className="text-xs border-orange-200 text-orange-600">Por Aprobar</Badge>}
+                                        {item.estatus === 'SOLICITUD' && <Badge variant="outline" className="text-xs border-orange-200 dark:border-orange-900/30 text-orange-600 dark:text-orange-400">Por Aprobar</Badge>}
                                     </TableCell>
 
                                     {/* Columna 4: Usuario (Solo si existe) */}
                                     <TableCell>
                                         {item.username ? (
-                                            <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-700 border border-slate-200">
+                                            <code className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                                 {item.username}
                                             </code>
                                         ) : (
@@ -355,7 +355,7 @@ export default function UsuariosPage() {
                                                 <Button 
                                                     size="sm" 
                                                     variant="outline"
-                                                    className="h-8 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                    className="h-8 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/30 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                                     disabled={isProcessing}
                                                     onClick={() => handleEnviarInvitacion(item, false)}
                                                 >
